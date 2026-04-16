@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+
+  php-fpm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: order_php
+    restart: unless-stopped
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - order_net
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:alpine
+    container_name: order_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - order_net
+    depends_on:
+      - php-fpm
+
+  mysql:
+    image: mysql:8.0
+    container_name: order_mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: order_management
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - order_net
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: order_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    networks:
+      - order_net
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+
+networks:
+  order_net:
+    driver: bridge
