@@ -1,22 +1,23 @@
 FROM php:8.2-cli
 
-WORKDIR /app
+# set working dir
+WORKDIR /var/www
 
-# install system dependencies
+# install deps
 RUN apt-get update && apt-get install -y \
     git unzip curl
 
 # install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# copy project
-COPY . .
+# copy composer files FIRST
+COPY composer.json composer.lock /var/www/
 
-# install PHP dependencies
+# install dependencies
 RUN composer install
 
-# expose Railway port
-EXPOSE 8080
+# copy rest of app
+COPY . /var/www/
 
-# start app (IMPORTANT)
+# start app
 CMD php -S 0.0.0.0:$PORT -t src/public
