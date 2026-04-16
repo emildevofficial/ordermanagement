@@ -1,19 +1,22 @@
-FROM php:8.2-fpm
+FROM php:8.2-cli
 
+WORKDIR /app
+
+# install system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl libpng-dev libonig-dev \
-    libxml2-dev zip unzip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    git unzip curl
 
-RUN docker-php-ext-install \
-    pdo pdo_mysql mbstring exif pcntl bcmath
-
+# install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www/html
+# copy project
+COPY . .
 
+# install PHP dependencies
+RUN composer install
 
+# expose Railway port
+EXPOSE 8080
 
-EXPOSE 9000
-
-CMD ["php-fpm"]
+# start app (IMPORTANT)
+CMD php -S 0.0.0.0:$PORT -t src/public
