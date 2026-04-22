@@ -12,13 +12,18 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class OrderDeleteHandler implements RequestHandlerInterface
 {
+
+private Database $db;
+
+public function __construct(Database $db)
+{
+    $this->db = $db;
+}
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $id = $request->getAttribute('id');
 
-        $config = require __DIR__ . '/../../../../config/autoload/database.global.php';
-        $pdo = Database::getConnection($config['database']);
-
+       $pdo = $this->db->getPdo();
         $stmt = $pdo->prepare("DELETE FROM orders WHERE id = :id");
         $stmt->execute([':id' => $id]);
 

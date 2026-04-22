@@ -12,6 +12,11 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class DashboardHandler implements RequestHandlerInterface
 {
+    private \App\Database\Database $db;
+    public function __construct(\App\Database\Database $db)
+{
+    $this->db = $db;
+}
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         // AuthMiddleware already verified session.
@@ -20,8 +25,7 @@ class DashboardHandler implements RequestHandlerInterface
         $userRole = $request->getAttribute('user_role');
         $currentRoute = 'dashboard';
        $config = require __DIR__ . '/../../../../config/autoload/database.global.php';
-$pdo = \App\Database\Database::getConnection($config['database']);
-
+$pdo = $this->db->getPdo();
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM orders");
 $result = $stmt->fetch();
 
@@ -93,11 +97,7 @@ $totalOrders = $result['total'] ?? 0;
                     <span class='ml-auto bg-indigo-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-200 text-xs font-semibold px-2 py-0.5 rounded-full'>0</span>
                 </div>
             </a>
-            <a href='/orders/create' class='block w-full'>
-                <div class='flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition cursor-pointer'>
-                    <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 4v16m8-8H4'/></svg>
-                    <span>Create Order</span>
-                </div>
+               
             </a>
             <a href='/customers' class='block w-full'>
                 <div class='flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition cursor-pointer'>

@@ -56,15 +56,15 @@ $app->get('/logout', LogoutHandler::class, 'logout');
         OrderListHandler::class,
     ], 'orders.list');
 
-    $app->get('/orders/create', [
-        AuthMiddleware::class,
-        OrderCreateHandler::class,
-    ], 'orders.create');
+   $app->get('/orders/create', [
+    AuthMiddleware::class,
+    OrderCreateHandler::class,
+], 'orders.create');
 
-    $app->post('/orders/create', [
-        AuthMiddleware::class,
-        OrderCreateHandler::class,
-    ], 'orders.create.post');
+$app->post('/orders/create', [
+    AuthMiddleware::class,
+    OrderCreateHandler::class,
+], 'orders.create.post');
 
     $app->post('/orders/{id:\d+}/update', [
         AuthMiddleware::class,
@@ -75,6 +75,18 @@ $app->get('/logout', LogoutHandler::class, 'logout');
         AuthMiddleware::class,
         OrderDeleteHandler::class,
     ], 'orders.delete');
+
+
+
+$app->get('/orders/{id:\d+}/edit', [
+    AuthMiddleware::class,
+    OrderUpdateHandler::class,
+], 'orders.edit');
+
+$app->post('/orders/{id:\d+}/edit', [
+    AuthMiddleware::class,
+    OrderUpdateHandler::class,
+], 'orders.edit.post');
 
     $app->get('/profile', [
     AuthMiddleware::class,

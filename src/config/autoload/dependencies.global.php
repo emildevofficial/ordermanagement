@@ -2,25 +2,70 @@
 
 declare(strict_types=1);
 
+use App\Database\Database;
+use App\Handler\Auth\LoginHandler;
+use App\Handler\Auth\LoginHandlerFactory;
+use App\Handler\Dashboard\DashboardHandler;
+use App\Handler\Order\OrderListHandler;
+use App\Handler\Order\OrderUpdateHandler;
+use App\Handler\Order\OrderDeleteHandler;
+use App\Handler\Order\OrderCreateHandler;
+
+
+
 return [
-    // Provides application-wide services.
-    // We recommend using fully-qualified class names whenever possible as
-    // service names.
     'dependencies' => [
-        // Use 'aliases' to alias a service name to another service. The
-        // key is the alias name, the value is the service to which it points.
+
         'aliases' => [
-            // Fully\Qualified\ClassOrInterfaceName::class => Fully\Qualified\ClassName::class,
+            // mund t’i lësh bosh për tani
         ],
-        // Use 'invokables' for constructor-less services, or services that do
-        // not require arguments to the constructor. Map a service name to the
-        // class name.
+
         'invokables' => [
-            // Fully\Qualified\InterfaceName::class => Fully\Qualified\ClassName::class,
+            // bosh
         ],
-        // Use 'factories' for services provided by callbacks/factory classes.
+
         'factories' => [
-            // Fully\Qualified\ClassName::class => Fully\Qualified\FactoryName::class,
+
+            // ✅ DATABASE (SHUMË E RËNDËSISHME)
+            Database::class => function ($container) {
+                $config = $container->get('config')['database'];
+                return new Database($config);
+            },
+
+            // ✅ LOGIN HANDLER
+            LoginHandler::class => LoginHandlerFactory::class,
+
+            // ✅ DASHBOARD HANDLER (FIX I ERRORIT)
+            DashboardHandler::class => function ($container) {
+                return new DashboardHandler(
+                    $container->get(Database::class)
+                );
+            },
+
+            OrderListHandler::class => function ($container) {
+    return new OrderListHandler(
+        $container->get(Database::class)
+    );
+},
+
+OrderUpdateHandler::class => function ($container) {
+    return new OrderUpdateHandler(
+        $container->get(\App\Database\Database::class)
+    );
+},
+
+OrderDeleteHandler::class => function ($container) {
+    return new OrderDeleteHandler(
+        $container->get(\App\Database\Database::class)
+    );
+},
+
+OrderCreateHandler::class => function ($c) {
+    return new OrderCreateHandler(
+        $c->get(\App\Database\Database::class)
+    );
+},
+
         ],
     ],
 ];
