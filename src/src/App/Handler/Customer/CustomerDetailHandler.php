@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class CustomerCreateHandler implements RequestHandlerInterface
+class CustomerDetailHandler implements RequestHandlerInterface
 {
     private Database $db;
 
@@ -26,28 +26,39 @@ class CustomerCreateHandler implements RequestHandlerInterface
     {
         Session::start();
 
-        if ($request->getMethod() === 'POST') {
-            $data = $request->getParsedBody();
-
-            $name = trim((string)($data['name'] ?? ''));
-            $email = trim((string)($data['email'] ?? ''));
-
-            if ($name !== '' && $email !== '') {
-                $pdo = $this->db->getPdo();
-                $stmt = $pdo->prepare("
-                    INSERT INTO customers (name, email, created_at, is_active)
-                    VALUES (:name, :email, NOW(), 1)
-                ");
-                $stmt->execute([
-                    ':name' => $name,
-                    ':email' => $email,
-                ]);
-            }
-
+        $id = (int) $request->getAttribute('id');
+        if ($id <= 0) {
             return new RedirectResponse('/customers');
         }
 
-        $content = Template::render('customers/create', []);
+        $pdo = $this->db->getPdo();
+
+        $customerStmt = $pdo->prepare("
+            SELECT id, name, email, created_at
+            FROM customers
+            WHERE id = :id
+            LIMIT 1
+        ");
+        $customerStmt->execute([':id' => $id]);
+        $customer = $customerStmt->fetch();
+
+        if (!$customer) {
+            return new RedirectResponse('/customers');
+        }
+
+        $ordersStmt = $pdo->prepare("
+            SELECT id, status, total, created_at
+            FROM orders
+            WHERE customer_id = :customer_id
+            ORDER BY created_at DESC
+        ");
+        $ordersStmt->execute([':customer_id' => $id]);
+        $orders = $ordersStmt->fetchAll();
+
+        $content = Template::render('customers/detail', [
+            'customer' => $customer,
+            'orders' => $orders,
+        ]);
 
         return new HtmlResponse(
             Template::render('layout', [

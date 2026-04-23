@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Handler\Customer;
 
 use App\Database\Database;
+use App\Helper\Session;
+use App\Helper\Template;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,79 +14,51 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class CustomerListHandler implements RequestHandlerInterface
 {
+    private Database $db;
+
+    public function __construct(Database $db)
+    {
+        $this->db = $db;
+    }
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $config = require __DIR__ . '/../../../../config/autoload/database.global.php';
-        $pdo = Database::getConnection($config['database']);
+        Session::start();
 
-        $stmt = $pdo->query("SELECT * FROM customers ORDER BY created_at DESC");
+        $userName = Session::get('user_name') ?? 'User';
+        $role = Session::get('user_role') ?? 'user';
+        $currentRoute = 'customers';
+
+        $pdo = $this->db->getPdo();
+
+        $stmt = $pdo->prepare("
+            SELECT
+                c.id,
+                c.name,
+                c.email,
+                c.created_at,
+                COUNT(o.id) AS order_count,
+                COALESCE(SUM(o.total), 0) AS total_spent
+            FROM customers c
+            LEFT JOIN orders o ON o.customer_id = c.id
+            GROUP BY c.id, c.name, c.email, c.created_at
+            ORDER BY c.created_at DESC
+        ");
+        $stmt->execute();
+
         $customers = $stmt->fetchAll();
 
-        $rows = '';
+        $content = Template::render('customers/list', [
+            'customers' => $customers,
+        ]);
 
-        foreach ($customers as $customer) {
-            $rows .= "
-                <tr class='border-t'>
-                    <td class='px-4 py-2'>#" . $customer['id'] . "</td>
-                    <td class='px-4 py-2'>" . htmlspecialchars($customer['name']) . "</td>
-                    <td class='px-4 py-2'>" . htmlspecialchars($customer['email']) . "</td>
-                    <td class='px-4 py-2'>" . $customer['created_at'] . "</td>
-                </tr>
-            ";
-        }
-
-        if (empty($rows)) {
-            $rows = "
-                <tr>
-                    <td colspan='4' class='text-center py-6 text-slate-500'>
-                        No customers found.
-                    </td>
-                </tr>
-            ";
-        }
-
-        return new HtmlResponse("
-        <html>
-        <head>
-            <script src='https://cdn.tailwindcss.com'></script>
-        </head>
-        <body class='bg-slate-50 p-10'>
-
-        <div class='max-w-5xl mx-auto'>
-
-            <div class='flex justify-between items-center mb-6'>
-            <a href='/customers/create'
-          class='px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm'>
-             + Add Customer
-               </a>
-                <h1 class='text-2xl font-semibold'>Customers</h1>
-
-                <a href='/dashboard'
-                   class='px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm'>
-                    ← Back
-                </a>
-            </div>
-
-            <div class='bg-white rounded-xl shadow overflow-hidden'>
-                <table class='w-full text-sm'>
-                    <thead class='bg-slate-100 text-left'>
-                        <tr>
-                            <th class='px-4 py-3'>ID</th>
-                            <th class='px-4 py-3'>Name</th>
-                            <th class='px-4 py-3'>Email</th>
-                            <th class='px-4 py-3'>Created</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        $rows
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-        </body>
-        </html>
-        ");
+        return new HtmlResponse(
+            Template::render('layout', [
+                'content' => $content,
+                'currentRoute' => $currentRoute,
+                'userName' => $userName,
+                'role' => $role,
+            ])
+        );
     }
 }

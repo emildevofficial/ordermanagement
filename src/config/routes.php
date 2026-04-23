@@ -10,6 +10,7 @@ use App\Handler\Order\OrderListHandler;
 use App\Handler\Order\OrderCreateHandler;
 use App\Handler\Order\OrderUpdateHandler;
 use App\Handler\Order\OrderDeleteHandler;
+use App\Handler\Order\OrderDetailHandler;
 use App\Middleware\AuthMiddleware;
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory; // 🔥 KJO MUNGONTE
@@ -20,6 +21,7 @@ use App\Handler\Profile\ChangePasswordHandler;
 use App\Handler\Customer\CustomerListHandler;
 use App\Handler\Settings\SettingsHandler;
 use App\Handler\Customer\CustomerCreateHandler;
+use App\Handler\Customer\CustomerDetailHandler;
 use App\Middleware\RoleMiddleware;
 
 
@@ -76,6 +78,15 @@ $app->post('/orders/create', [
         OrderDeleteHandler::class,
     ], 'orders.delete');
 
+    $app->post('/orders/{id:\d+}/cancel', [
+        AuthMiddleware::class,
+        OrderDeleteHandler::class,
+    ], 'orders.cancel');
+
+    $app->get('/orders/{id:\d+}', [
+        AuthMiddleware::class,
+        OrderDetailHandler::class,
+    ], 'orders.detail');
 
 
 $app->get('/orders/{id:\d+}/edit', [
@@ -113,23 +124,13 @@ $app->post('/profile/password', [
     ChangePasswordHandler::class,
 ]);
 
-$app->get('/customers', [
-    AuthMiddleware::class,
-    RoleMiddleware::class,
-    CustomerListHandler::class,
-]);
+$app->get('/customers', CustomerListHandler::class, 'customers.list');
 
-$app->get('/customers/create', [
-    AuthMiddleware::class,
-    RoleMiddleware::class,
-    CustomerCreateHandler::class,
-]);
+$app->route('/customers/create', [
+    CustomerCreateHandler::class
+], ['GET', 'POST'], 'customers.create');
 
-$app->post('/customers/create', [
-    AuthMiddleware::class,
-    RoleMiddleware::class,
-    CustomerCreateHandler::class,
-]);
+$app->get('/customers/{id:\d+}', CustomerDetailHandler::class, 'customers.detail');
 
 
 $app->get('/settings', [
@@ -137,4 +138,46 @@ $app->get('/settings', [
     SettingsHandler::class,
 ], 'settings');
 
+// Product routes
+$app->route('/products/create', [
+    \App\Handler\Product\ProductCreateHandler::class
+], ['GET','POST'], 'products.create');
+
+$app->get('/products', [
+    AuthMiddleware::class,
+    \App\Handler\Product\ProductListHandler::class,
+], 'products.list');
+
+$app->post('/products/{id:\d+}/stock', [
+    AuthMiddleware::class,
+    \App\Handler\Product\ProductUpdateStockHandler::class,
+], 'products.update-stock');
+
+$app->post('/products/{id:\d+}/toggle', [
+    AuthMiddleware::class,
+    \App\Handler\Product\ProductToggleHandler::class,
+], 'products.toggle');
+
+// Return routes - admin only
+$app->get('/returns', [
+    \App\Middleware\AuthMiddleware::class,
+    \App\Handler\Return\ReturnListHandler::class,
+], 'returns.list');
+
+$app->get('/returns/{id:\d+}', [
+    AuthMiddleware::class,
+    \App\Handler\Return\ReturnViewHandler::class,
+], 'returns.view');
+
+$app->get('/returns/{id:\d+}/review', [
+    AuthMiddleware::class,
+    \App\Handler\Return\ReturnReviewHandler::class,
+], 'returns.review');
+
+$app->post('/returns/{id:\d+}/update', [
+    AuthMiddleware::class,
+    \App\Handler\Return\ReturnUpdateHandler::class,
+], 'returns.update');
+
 };
+

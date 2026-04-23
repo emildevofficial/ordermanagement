@@ -35,26 +35,43 @@ class OrderListHandler implements RequestHandlerInterface
 
         if ($role === 'admin') {
             $stmt = $pdo->query("
-                SELECT
-                    o.*,
+                SELECT 
+                    o.id,
+                    o.status,
+                    o.total,
+                    o.created_at,
                     c.name AS customer_name,
-                    c.email AS customer_email
+                    c.email AS customer_email,
+                    p.name AS product_name,
+                    oi.quantity
                 FROM orders o
-                JOIN customers c ON c.id = o.customer_id
-                ORDER BY created_at DESC
+                JOIN customers c ON o.customer_id = c.id
+                LEFT JOIN order_items oi ON oi.order_id = o.id
+                LEFT JOIN products p ON p.id = oi.product_id
+                ORDER BY o.created_at DESC
             ");
+
         } else {
+
             $stmt = $pdo->prepare("
-                SELECT
-                    o.*,
+                SELECT 
+                    o.id,
+                    o.status,
+                    o.total,
+                    o.created_at,
                     c.name AS customer_name,
-                    c.email AS customer_email
+                    c.email AS customer_email,
+                    p.name AS product_name,
+                    oi.quantity
                 FROM orders o
-                JOIN customers c ON c.id = o.customer_id
-                WHERE user_id = :user_id
-                ORDER BY created_at DESC
+                JOIN customers c ON o.customer_id = c.id
+                LEFT JOIN order_items oi ON oi.order_id = o.id
+                LEFT JOIN products p ON p.id = oi.product_id
+                WHERE o.user_id = :user_id
+                ORDER BY o.created_at DESC
             ");
             $stmt->execute([':user_id' => $userId]);
+
         }
 
         $orders = $stmt->fetchAll();

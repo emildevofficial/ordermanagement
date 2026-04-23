@@ -43,6 +43,6 @@ class LogoutHandler implements RequestHandlerInterface
         Session::flash('success', 'You have been logged out.');
 
         // Redirect to your auth page (NOT /login anymore)
-        return new RedirectResponse('/register');
+        return new RedirectResponse('/login');
     }
 }
