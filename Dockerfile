@@ -18,7 +18,7 @@ WORKDIR /var/www/html
 COPY src/ .
 COPY docker/nginx/railway.conf.template /etc/nginx/templates/default.conf.template
 
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction \
+RUN composer install --prefer-dist --optimize-autoloader --no-interaction \
     && composer clear-config-cache \
     && chown -R www-data:www-data /var/www/html/data
 
