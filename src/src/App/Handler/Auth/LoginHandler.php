@@ -61,9 +61,11 @@ class LoginHandler implements RequestHandlerInterface
 
             // ✅ sukses
             Session::set('user_id', $user['id']);
+            Session::set('user_name', $user['name']);
+            Session::set('user_role', $user['role']);
             Session::set('user_email', $user['email']);
 
-            return new RedirectResponse('/dashboard');
+            return new RedirectResponse($user['role'] === 'admin' ? '/dashboard' : '/shop');
         }
 
         // fallback

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Handler\Customer;
 
 use App\Database\Database;
+use App\Helper\DateTimeHelper;
 use App\Helper\Session;
 use App\Helper\Template;
 use Laminas\Diactoros\Response\HtmlResponse;
@@ -34,13 +35,36 @@ class CustomerCreateHandler implements RequestHandlerInterface
 
             if ($name !== '' && $email !== '') {
                 $pdo = $this->db->getPdo();
+                
+                // Check if a user exists with this email to link the customer
+                $userStmt = $pdo->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
+                $userStmt->execute([':email' => $email]);
+                $userRow = $userStmt->fetch();
+                $linkedUserId = $userRow ? (int)$userRow['id'] : null;
+
+                if ($linkedUserId !== null) {
+                    $existingStmt = $pdo->prepare("SELECT id FROM customers WHERE user_id = :user_id LIMIT 1");
+                    $existingStmt->execute([':user_id' => $linkedUserId]);
+                    if ($existingStmt->fetch()) {
+                        return new RedirectResponse('/customers');
+                    }
+                }
+
+                $existingEmailStmt = $pdo->prepare("SELECT id FROM customers WHERE email = :email LIMIT 1");
+                $existingEmailStmt->execute([':email' => $email]);
+                if ($existingEmailStmt->fetch()) {
+                    return new RedirectResponse('/customers');
+                }
+                
                 $stmt = $pdo->prepare("
-                    INSERT INTO customers (name, email, created_at, is_active)
-                    VALUES (:name, :email, NOW(), 1)
+                    INSERT INTO customers (user_id, name, email, created_at, is_active)
+                    VALUES (:user_id, :name, :email, :created_at, 1)
                 ");
                 $stmt->execute([
+                    ':user_id' => $linkedUserId,
                     ':name' => $name,
                     ':email' => $email,
+                    ':created_at' => DateTimeHelper::nowForStorage(),
                 ]);
             }
 

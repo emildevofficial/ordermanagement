@@ -26,15 +26,20 @@ class ProductListHandler implements RequestHandlerInterface
         Session::start();
 
         $pdo = $this->db->getPdo();
+        $this->ensureProductMetadataColumns($pdo);
 
         $stmt = $pdo->prepare("
-            SELECT id, name, price, stock, is_active
+            SELECT id, name, price, stock, is_active, created_at, updated_at, last_restocked_at, restock_count
             FROM products
             ORDER BY id DESC
         ");
         $stmt->execute();
 
         $products = $stmt->fetchAll();
+
+        $userName = Session::get('user_name');
+        $role = Session::get('user_role');
+        $currentRoute = 'products';
 
         $content = Template::render('products/list', [
             'products' => $products,
@@ -43,10 +48,27 @@ class ProductListHandler implements RequestHandlerInterface
         return new HtmlResponse(
             Template::render('layout', [
                 'content' => $content,
-                'currentRoute' => 'products',
-                'userName' => Session::get('user_name') ?? 'User',
-                'role' => Session::get('user_role') ?? 'user',
+                'currentRoute' => $currentRoute,
+                'userName' => $userName,
+                'role' => $role,
             ])
         );
+    }
+
+    private function ensureProductMetadataColumns(\PDO $pdo): void
+    {
+        $columns = [
+            'last_restocked_at' => "ALTER TABLE products ADD COLUMN last_restocked_at DATETIME NULL",
+            'restock_count' => "ALTER TABLE products ADD COLUMN restock_count INT NOT NULL DEFAULT 0",
+            'updated_at' => "ALTER TABLE products ADD COLUMN updated_at DATETIME NULL",
+        ];
+
+        foreach ($columns as $column => $sql) {
+            $stmt = $pdo->prepare("SHOW COLUMNS FROM products LIKE :column");
+            $stmt->execute([':column' => $column]);
+            if (!$stmt->fetch()) {
+                $pdo->exec($sql);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ namespace App\Handler\Customer;
 
 use App\Database\Database;
 use App\Helper\Session;
+use App\Helper\Permission;
 use App\Helper\Template;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -29,23 +30,29 @@ class CustomerListHandler implements RequestHandlerInterface
         $role = Session::get('user_role') ?? 'user';
         $currentRoute = 'customers';
 
-        $pdo = $this->db->getPdo();
+        // Admin-only: prevent non-admins from accessing customers listing
+        $deny = Permission::requireRole('admin');
+        if ($deny instanceof \Laminas\Diactoros\Response\RedirectResponse) {
+            return $deny;
+        }
 
+        $pdo = $this->db->getPdo();
         $stmt = $pdo->prepare("
             SELECT
-                c.id,
-                c.name,
-                c.email,
-                c.created_at,
+                COALESCE(c.id, u.id) AS id,
+                COALESCE(c.name, u.name) AS name,
+                COALESCE(c.email, u.email) AS email,
+                COALESCE(c.created_at, u.created_at) AS created_at,
                 COUNT(o.id) AS order_count,
                 COALESCE(SUM(o.total), 0) AS total_spent
-            FROM customers c
-            LEFT JOIN orders o ON o.customer_id = c.id
-            GROUP BY c.id, c.name, c.email, c.created_at
-            ORDER BY c.created_at DESC
+            FROM users u
+            LEFT JOIN customers c ON c.user_id = u.id
+            LEFT JOIN orders o ON o.user_id = u.id
+            WHERE u.role = 'user'
+            GROUP BY u.id, u.name, u.email, u.created_at, c.id, c.name, c.email, c.created_at
+            ORDER BY COALESCE(c.created_at, u.created_at) DESC
         ");
         $stmt->execute();
-
         $customers = $stmt->fetchAll();
 
         $content = Template::render('customers/list', [
@@ -60,5 +67,6 @@ class CustomerListHandler implements RequestHandlerInterface
                 'role' => $role,
             ])
         );
+
     }
 }

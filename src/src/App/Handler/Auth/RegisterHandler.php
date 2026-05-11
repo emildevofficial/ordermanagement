@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Handler\Auth;
 
 use App\Database\Database;
+use App\Helper\DateTimeHelper;
 use App\Helper\Session;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -13,6 +14,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class RegisterHandler implements RequestHandlerInterface
 {
+    private Database $db;
+
+    public function __construct(Database $db)
+    {
+        $this->db = $db;
+    }
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         Session::start();
@@ -53,36 +60,69 @@ class RegisterHandler implements RequestHandlerInterface
             return new RedirectResponse('/login?tab=register');
         }
 
-        $config = require __DIR__ . '/../../../../config/autoload/database.global.php';
-        $pdo    = Database::getConnection($config['database']);
-
         // Duplicate email check
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email');
-        $stmt->execute([':email' => $email]);
-
-        if ($stmt->fetch()) {
+        $existing = $this->db->findUserByEmail($email);
+        if ($existing) {
             Session::flash('register_error', 'This email is already registered.');
             return new RedirectResponse('/login?tab=register');
         }
-
         // Insert new user
-        $insert = $pdo->prepare(
-            'INSERT INTO users (name, email, password, role)
-             VALUES (:name, :email, :password, :role)'
-        );
-        $insert->execute([
-            ':name'     => $name,
-            ':email'    => $email,
-            ':password' => password_hash($password, PASSWORD_BCRYPT),
-            ':role'     => 'user',
-        ]);
+        $pdo = $this->db->getPdo();
+        $pdo->beginTransaction();
+
+        try {
+            $now = DateTimeHelper::nowForStorage();
+
+            $insert = $pdo->prepare(
+                'INSERT INTO users (name, email, password, role, created_at)
+                 VALUES (:name, :email, :password, :role, :created_at)'
+            );
+            $insert->execute([
+                ':name'     => $name,
+                ':email'    => $email,
+                ':password' => password_hash($password, PASSWORD_BCRYPT),
+                ':role'     => 'user',
+                ':created_at' => $now,
+            ]);
+
+            $userId = (int)$pdo->lastInsertId();
+
+            $customerInsert = $pdo->prepare(
+                'INSERT INTO customers (user_id, name, email, created_at, is_active)
+                 VALUES (:user_id, :name, :email, :created_at, 1)'
+            );
+            $customerInsert->execute([
+                ':user_id' => $userId,
+                ':name' => $name,
+                ':email' => $email,
+                ':created_at' => $now,
+            ]);
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            Session::flash('register_error', 'Registration failed. Please try again.');
+            return new RedirectResponse('/login?tab=register');
+        }
 
         // Auto-login immediately after registration
         session_regenerate_id(true);
-        Session::set('user_id',   (int)$pdo->lastInsertId());
+        Session::set('user_id', $userId);
         Session::set('user_name', $name);
         Session::set('user_role', 'user');
+        Session::set('user_email', $email);
 
-        return new RedirectResponse('/dashboard');
+        // Welcome discount notification
+        $promo = $pdo->query(
+            'SELECT new_user_discount_enabled, new_user_discount_percent FROM promotion_settings LIMIT 1'
+        )->fetch();
+        if ($promo && (int)$promo['new_user_discount_enabled'] === 1) {
+            Session::flash(
+                'welcome_discount',
+                'Welcome! You\'ve earned ' . (int)$promo['new_user_discount_percent'] . '% off your first order.'
+            );
+        }
+
+        return new RedirectResponse('/shop');
     }
 }

@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Handler\Order;
 
 use App\Database\Database;
+use App\Helper\DateTimeHelper;
 use App\Helper\Session;
 use App\Helper\Template;
+use App\Helper\Permission;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
+use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -34,9 +37,8 @@ class OrderUpdateHandler implements RequestHandlerInterface
         $userName = Session::get('user_name') ?? 'User';
         $currentRoute = 'orders';
 
-        // GET → show edit page
         if ($request->getMethod() === 'GET') {
-            if ($role === 'admin') {
+            if (Permission::isAllowed('admin')) {
                 $stmt = $pdo->prepare("SELECT * FROM orders WHERE id = :id LIMIT 1");
                 $stmt->execute([':id' => $id]);
             } else {
@@ -53,14 +55,13 @@ class OrderUpdateHandler implements RequestHandlerInterface
                 return new RedirectResponse('/orders');
             }
 
-            // Load products and order_items for edit form
             $stmt = $pdo->prepare("SELECT id, name FROM products WHERE is_active = 1 ORDER BY name ASC");
             $stmt->execute();
             $products = $stmt->fetchAll();
             
             $stmt = $pdo->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = :id");
             $stmt->execute([':id' => $id]);
-            $orderItems = $stmt->fetch();
+            $orderItems = $stmt->fetch(PDO::FETCH_ASSOC);
             
             $currentProductId = $orderItems ? $orderItems['product_id'] : 0;
             $currentQuantity = $orderItems ? $orderItems['quantity'] : 0;
@@ -82,7 +83,6 @@ class OrderUpdateHandler implements RequestHandlerInterface
             );
         }
 
-        // POST → update with stock-safe order_items
         $data = $request->getParsedBody();
         $status = (string) ($data['status'] ?? 'pending');
         $notes = isset($data['notes']) ? trim((string)$data['notes']) : null;
@@ -90,7 +90,7 @@ class OrderUpdateHandler implements RequestHandlerInterface
         $productId = (int) ($data['product_id'] ?? 0);
         $quantity = (int) ($data['quantity'] ?? 0);
 
-        $allowedStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+        $allowedStatuses = ['pending', 'completed', 'cancelled'];
 
         if (!in_array($status, $allowedStatuses, true)) {
             $status = 'pending';
@@ -103,7 +103,6 @@ class OrderUpdateHandler implements RequestHandlerInterface
         $pdo->beginTransaction();
 
         try {
-            // 1. Get old order_items
             $stmt = $pdo->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = :id");
             $stmt->execute([':id' => $id]);
             $oldItems = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -112,12 +111,10 @@ class OrderUpdateHandler implements RequestHandlerInterface
                 $oldProductId = (int) key($oldItems);
                 $oldQuantity = (int) $oldItems[$oldProductId];
                 
-                // Restore old stock
                 $stmt = $pdo->prepare("UPDATE products SET stock = stock + :qty WHERE id = :pid");
                 $stmt->execute([':qty' => $oldQuantity, ':pid' => $oldProductId]);
             }
 
-            // 2. Validate new stock
             $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = :id");
             $stmt->execute([':id' => $productId]);
             $stock = $stmt->fetchColumn();
@@ -127,7 +124,6 @@ class OrderUpdateHandler implements RequestHandlerInterface
                 return new RedirectResponse('/orders/' . $id . '/edit?error=no_stock');
             }
 
-            // 3. Update order_items
             $stmt = $pdo->prepare("
                 UPDATE order_items 
                 SET product_id = :pid, quantity = :qty 
@@ -139,45 +135,47 @@ class OrderUpdateHandler implements RequestHandlerInterface
                 ':oid' => $id
             ]);
 
-            // 4. Deduct new stock
             $stmt = $pdo->prepare("UPDATE products SET stock = stock - :qty WHERE id = :pid");
             $stmt->execute([':qty' => $quantity, ':pid' => $productId]);
 
-            // 5. Update order status/notes
-            if ($role === 'admin') {
+            $updatedAt = DateTimeHelper::nowForStorage();
+
+            if (Permission::isAllowed('admin')) {
                 $stmt = $pdo->prepare("
                     UPDATE orders 
-                    SET status = :status, notes = :notes, total = :total, updated_at = NOW() 
+                    SET status = :status, notes = :notes, total = :total, updated_at = :updated_at 
                     WHERE id = :id
                 ");
                 $stmt->execute([
                     ':status' => $status,
                     ':notes' => $notes,
-                    ':total' => ($quantity * 10), // simple price assumption
+                    ':total' => ($quantity * 10),
+                    ':updated_at' => $updatedAt,
                     ':id' => $id,
                 ]);
             } else {
                 $stmt = $pdo->prepare("
                     UPDATE orders 
-                    SET status = :status, notes = :notes, total = :total, updated_at = NOW() 
+                    SET status = :status, notes = :notes, total = :total, updated_at = :updated_at 
                     WHERE id = :id AND user_id = :user_id
                 ");
                 $stmt->execute([
                     ':status' => $status,
                     ':notes' => $notes,
                     ':total' => ($quantity * 10),
+                    ':updated_at' => $updatedAt,
                     ':id' => $id,
                     ':user_id' => $userId,
                 ]);
             }
 
             $pdo->commit();
-        } catch (Exception $e) {
+        } catch (PDOException $e) {
             $pdo->rollBack();
             return new RedirectResponse('/orders/' . $id . '/edit?error=update_failed');
         }
 
         return new RedirectResponse('/orders/' . $id);
     }
-
 }
+

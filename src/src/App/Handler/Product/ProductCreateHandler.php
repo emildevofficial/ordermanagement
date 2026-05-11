@@ -3,6 +3,7 @@
 namespace App\Handler\Product;
 
 use App\Database\Database;
+use App\Helper\DateTimeHelper;
 use App\Helper\Template;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
@@ -24,6 +25,7 @@ class ProductCreateHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $pdo = $this->db->getPdo();
+        $this->ensureProductTimestampColumns($pdo);
 
         if ($request->getMethod() === 'POST') {
             $data = $request->getParsedBody();
@@ -41,14 +43,17 @@ class ProductCreateHandler implements RequestHandlerInterface
             }
 
             $stmt = $pdo->prepare("
-                INSERT INTO products (name, price, stock, is_active, created_at)
-                VALUES (:name, :price, :stock, 1, NOW())
+                INSERT INTO products (name, price, stock, is_active, created_at, updated_at)
+                VALUES (:name, :price, :stock, 1, :created_at, :updated_at)
             ");
 
+            $now = DateTimeHelper::nowForStorage();
             $stmt->execute([
                 'name' => $name,
                 'price' => $price,
-                'stock' => $stock
+                'stock' => $stock,
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
 
             return new RedirectResponse('/products');
@@ -57,5 +62,14 @@ class ProductCreateHandler implements RequestHandlerInterface
         return new HtmlResponse($this->template->render('layout', [
             'content' => $this->template->render('products/create')
         ]));
+    }
+
+    private function ensureProductTimestampColumns(\PDO $pdo): void
+    {
+        $stmt = $pdo->prepare("SHOW COLUMNS FROM products LIKE 'updated_at'");
+        $stmt->execute();
+        if (!$stmt->fetch()) {
+            $pdo->exec("ALTER TABLE products ADD COLUMN updated_at DATETIME NULL");
+        }
     }
 }

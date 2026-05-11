@@ -32,7 +32,7 @@ return [
 
         'factories' => [
 
-            // ✅ DATABASE (SHUMË E RËNDËSISHME)
+            
             Database::class => function ($container) {
                 $config = $container->get('config')['database'];
                 return new Database($config);
@@ -40,6 +40,8 @@ return [
 
             // ✅ LOGIN HANDLER
             LoginHandler::class => LoginHandlerFactory::class,
+            // ✅ REGISTER HANDLER
+            \App\Handler\Auth\RegisterHandler::class => \App\Handler\Auth\RegisterHandlerFactory::class,
 
             // ✅ DASHBOARD HANDLER (FIX I ERRORIT)
             \App\Handler\Dashboard\DashboardHandler::class => \App\Handler\Dashboard\DashboardHandlerFactory::class,
@@ -74,6 +76,8 @@ OrderDetailHandler::class => function ($c) {
     );
 },
 
+\App\Handler\Order\OrderStatusActionHandler::class => \App\Handler\Order\OrderStatusActionHandlerFactory::class,
+
 CustomerListHandler::class => CustomerListHandlerFactory::class,
 
 CustomerCreateHandler::class => function ($container) {
@@ -90,15 +94,32 @@ CustomerDetailHandler::class => CustomerDetailHandlerFactory::class,
 \App\Handler\Product\ProductUpdateStockHandler::class => \App\Handler\Product\ProductUpdateStockHandlerFactory::class,
 \App\Handler\Product\ProductToggleHandler::class => \App\Handler\Product\ProductToggleHandlerFactory::class,
 \App\Handler\Product\ProductCreateHandler::class => \App\Handler\Product\ProductCreateHandlerFactory::class,
+\App\Handler\Product\ProductEditHandler::class => \App\Handler\Product\ProductEditHandlerFactory::class,
 
 // Return handlers
 \App\Handler\Return\ReturnListHandler::class => \App\Handler\Return\ReturnListHandlerFactory::class,
+\App\Handler\Return\ReturnCreateHandler::class => function ($container) {
+    return new \App\Handler\Return\ReturnCreateHandler(
+        $container->get(Database::class)
+    );
+},
 \App\Handler\Return\ReturnViewHandler::class => \App\Handler\Return\ReturnViewHandlerFactory::class,
-\App\Handler\Return\ReturnReviewHandler::class => \App\Handler\Return\ReturnReviewHandlerFactory::class,
 \App\Handler\Return\ReturnUpdateHandler::class => \App\Handler\Return\ReturnUpdateHandlerFactory::class,
+
+\App\Handler\Settings\SettingsHandler::class => function ($container) {
+    return new \App\Handler\Settings\SettingsHandler(
+        $container->get(Database::class)
+    );
+},
 
 \App\Helper\Template::class => function($container) {
     return new \App\Helper\Template();
+},
+
+\App\Handler\Profile\ProfileHandler::class => function ($container) {
+    return new \App\Handler\Profile\ProfileHandler(
+        $container->get(Database::class)
+    );
 },
 
 

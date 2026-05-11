@@ -6,6 +6,7 @@ namespace App\Handler\Order;
 
 use App\Database\Database;
 use App\Helper\Session;
+use App\Helper\Permission;
 use App\Helper\Template;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -33,48 +34,63 @@ class OrderListHandler implements RequestHandlerInterface
 
         $pdo = $this->db->getPdo();
 
-        if ($role === 'admin') {
+        if (Permission::isAllowed('admin')) {
+            // Admin sees all orders with customer information
             $stmt = $pdo->query("
                 SELECT 
                     o.id,
                     o.status,
                     o.total,
                     o.created_at,
-                    c.name AS customer_name,
-                    c.email AS customer_email,
+                    COALESCE(c.name, u.name, 'Unknown Customer') AS customer_name,
+                    COALESCE(c.email, u.email, '') AS customer_email,
                     p.name AS product_name,
-                    oi.quantity
+                    oi.quantity,
+                    EXISTS(SELECT 1 FROM returns r WHERE r.order_id = o.id) AS has_return
                 FROM orders o
-                JOIN customers c ON o.customer_id = c.id
+                LEFT JOIN users u ON u.id = o.user_id
+                LEFT JOIN customers c ON o.customer_id = c.id
                 LEFT JOIN order_items oi ON oi.order_id = o.id
                 LEFT JOIN products p ON p.id = oi.product_id
                 ORDER BY o.created_at DESC
             ");
-
+            $orders = $stmt->fetchAll();
         } else {
-
+            // Regular user sees only their own orders with their user information
             $stmt = $pdo->prepare("
                 SELECT 
                     o.id,
                     o.status,
                     o.total,
                     o.created_at,
-                    c.name AS customer_name,
-                    c.email AS customer_email,
+                    u.name AS customer_name,
+                    u.email AS customer_email,
                     p.name AS product_name,
-                    oi.quantity
+                    oi.quantity,
+                    EXISTS(SELECT 1 FROM returns r WHERE r.order_id = o.id) AS has_return
                 FROM orders o
-                JOIN customers c ON o.customer_id = c.id
+                JOIN users u ON o.user_id = u.id
                 LEFT JOIN order_items oi ON oi.order_id = o.id
                 LEFT JOIN products p ON p.id = oi.product_id
                 WHERE o.user_id = :user_id
                 ORDER BY o.created_at DESC
             ");
             $stmt->execute([':user_id' => $userId]);
-
+            $orders = $stmt->fetchAll();
         }
 
-        $orders = $stmt->fetchAll();
+        $isAdmin = Permission::isAllowed('admin');
+        foreach ($orders as &$order) {
+            $status = (string)($order['status'] ?? '');
+            $hasReturn = !empty($order['has_return']);
+
+            $order['can_cancel'] = $status === 'pending';
+            $order['can_return'] = !$isAdmin
+                && in_array($status, ['completed', 'delivered'], true)
+                && !$hasReturn;
+        }
+        unset($order);
+
         $orderCount = count($orders);
 
         $content = Template::render('order/list', [

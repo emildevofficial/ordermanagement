@@ -7,6 +7,7 @@ namespace App\Handler\Order;
 use App\Database\Database;
 use App\Helper\Session;
 use App\Helper\Template;
+use App\Helper\Permission;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -43,7 +44,8 @@ class OrderDetailHandler implements RequestHandlerInterface
             SELECT 
                 o.*,
                 c.name as customer_name,
-                c.email as customer_email
+                c.email as customer_email,
+                EXISTS(SELECT 1 FROM returns r WHERE r.order_id = o.id) AS has_return
             FROM orders o
             LEFT JOIN customers c ON c.id = o.customer_id
             WHERE o.id = :id
@@ -56,9 +58,18 @@ class OrderDetailHandler implements RequestHandlerInterface
         }
 
         // Authorization check
-        if ($role !== 'admin' && $order['user_id'] != $userId) {
+        if (!Permission::isAllowed('admin') && $order['user_id'] != $userId) {
             return new RedirectResponse('/orders');
         }
+
+        $status = (string)($order['status'] ?? '');
+        $hasReturn = !empty($order['has_return']);
+        $isAdmin = Permission::isAllowed('admin');
+
+        $order['can_cancel'] = $status === 'pending';
+        $order['can_return'] = !$isAdmin
+            && in_array($status, ['completed', 'delivered'], true)
+            && !$hasReturn;
 
         $content = Template::render('order/detail', [
             'order' => $order,

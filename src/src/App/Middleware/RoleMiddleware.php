@@ -9,15 +9,18 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use App\Helper\Permission;
 
 class RoleMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $role = $request->getAttribute('user_role');
+        // Prefer explicit role attribute attached by AuthMiddleware,
+        // fall back to Permission helper which reads session.
+        $role = $request->getAttribute('user_role') ?? Permission::getRole();
 
         if ($role !== 'admin') {
-            return new RedirectResponse('/dashboard');
+            return new RedirectResponse('/shop');
         }
 
         return $handler->handle($request);

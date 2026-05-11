@@ -14,7 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class SettingsHandler implements RequestHandlerInterface
+class PromotionHandler implements RequestHandlerInterface
 {
     private Database $db;
 
@@ -27,17 +27,15 @@ class SettingsHandler implements RequestHandlerInterface
     {
         Session::start();
 
-        $userId = Session::get('user_id');
-        if (!$userId) {
-            return new RedirectResponse('/login');
+        if (!Session::get('user_id') || !Permission::isAllowed('admin')) {
+            return new RedirectResponse('/dashboard');
         }
 
+        $pdo      = $this->db->getPdo();
         $userName = Session::get('user_name');
         $role     = Session::get('user_role');
-        $isAdmin  = Permission::isAllowed('admin');
-        $pdo      = $this->db->getPdo();
 
-        if ($request->getMethod() === 'POST' && $isAdmin) {
+        if ($request->getMethod() === 'POST') {
             $body    = $request->getParsedBody();
             $enabled = isset($body['new_user_discount_enabled']) ? 1 : 0;
             $percent = min(100, max(0, (int)($body['new_user_discount_percent'] ?? 0)));
@@ -50,23 +48,17 @@ class SettingsHandler implements RequestHandlerInterface
             )->execute([':enabled' => $enabled, ':percent' => $percent]);
 
             Session::flash('promo_success', 'Promotion settings saved.');
-            return new RedirectResponse('/settings');
+            return new RedirectResponse('/settings/promotion');
         }
 
-        $promo = null;
-        if ($isAdmin) {
-            $promo = $pdo->query(
-                'SELECT new_user_discount_enabled, new_user_discount_percent
-                   FROM promotion_settings LIMIT 1'
-            )->fetch();
-        }
+        $promo = $pdo->query(
+            'SELECT new_user_discount_enabled, new_user_discount_percent
+               FROM promotion_settings LIMIT 1'
+        )->fetch();
 
-        $content = Template::render('settings/index', [
-            'userName'    => $userName,
-            'role'        => $role,
-            'isAdmin'     => $isAdmin,
-            'promo'       => $promo ?: ['new_user_discount_enabled' => 0, 'new_user_discount_percent' => 0],
-            'promoSuccess' => Session::getFlash('promo_success'),
+        $content = Template::render('settings/promotion', [
+            'promo'   => $promo ?: ['new_user_discount_enabled' => 0, 'new_user_discount_percent' => 0],
+            'success' => Session::getFlash('promo_success'),
         ]);
 
         return new HtmlResponse(
