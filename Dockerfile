@@ -18,6 +18,8 @@ WORKDIR /var/www/html
 COPY src/ .
 COPY docker/nginx/railway.conf.template /etc/nginx/templates/default.conf.template
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 RUN composer install --prefer-dist --optimize-autoloader --no-interaction \
     && composer clear-config-cache \
     && chown -R www-data:www-data /var/www/html/data
