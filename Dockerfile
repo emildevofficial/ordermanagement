@@ -16,13 +16,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY src/ .
-COPY docker/nginx/railway.conf.template /etc/nginx/templates/default.conf.template
+COPY docker/nginx/default.conf /etc/nginx/templates/default.conf.template
+COPY docker/php-fpm/railway.conf /usr/local/etc/php-fpm.d/zz-railway.conf
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV PORT=8080
 
 RUN composer install --prefer-dist --optimize-autoloader --no-interaction \
     && composer clear-config-cache \
-    && chown -R www-data:www-data /var/www/html/data
+    && chown -R www-data:www-data /var/www/html/data \
+    && rm -f /etc/nginx/sites-enabled/default
 
 EXPOSE 8080
 
