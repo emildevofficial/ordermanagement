@@ -18,6 +18,7 @@ WORKDIR /var/www/html
 COPY src/ .
 COPY docker/nginx/default.conf /etc/nginx/templates/default.conf.template
 COPY docker/php-fpm/railway.conf /usr/local/etc/php-fpm.d/zz-railway.conf
+COPY docker/start.sh /usr/local/bin/start.sh
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PORT=8080
@@ -25,8 +26,9 @@ ENV PORT=8080
 RUN composer install --prefer-dist --optimize-autoloader --no-interaction \
     && composer clear-config-cache \
     && chown -R www-data:www-data /var/www/html/data \
-    && rm -f /etc/nginx/sites-enabled/default
+    && rm -f /etc/nginx/sites-enabled/default \
+    && chmod +x /usr/local/bin/start.sh
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "export PORT=\"${PORT:-8080}\" && envsubst '$PORT' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["/usr/local/bin/start.sh"]
