@@ -4,17 +4,20 @@ use App\Helper\Permission;
 use App\Helper\DateTimeHelper;
 ?>
 
-<div class="w-full lg:w-[40vw] lg:min-w-[40rem] lg:max-w-[48rem] px-6 py-8 space-y-6">
+<div class="w-full max-w-3xl space-y-6">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
-            Customers
-        </h2>
+        <div>
+            <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+                <a href="/dashboard" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Dashboard</a>
+                <span class="mx-2 text-slate-400">/</span>
+                <span>Customers</span>
+            </nav>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
+                Customers
+            </h2>
+        </div>
 
         <div class="flex flex-wrap items-center justify-end gap-3">
-            <a href="/dashboard"
-               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-                ← Back to Dashboard
-            </a>
             <?php if (!Permission::isAllowed('admin')): ?>
             <a href="/customers/create"
                class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition">

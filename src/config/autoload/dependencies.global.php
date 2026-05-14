@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Database\Database;
+use App\Handler\Analytics\AnalyticsHandler;
+use App\Handler\Analytics\AnalyticsHandlerFactory;
 use App\Handler\Auth\LoginHandler;
 use App\Handler\Auth\LoginHandlerFactory;
 use App\Handler\Dashboard\DashboardHandler;
@@ -45,6 +47,7 @@ return [
 
             // ✅ DASHBOARD HANDLER (FIX I ERRORIT)
             \App\Handler\Dashboard\DashboardHandler::class => \App\Handler\Dashboard\DashboardHandlerFactory::class,
+            AnalyticsHandler::class => AnalyticsHandlerFactory::class,
 
             OrderListHandler::class => function ($container) {
     return new OrderListHandler(

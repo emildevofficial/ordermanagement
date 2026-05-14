@@ -3,14 +3,14 @@
 ?>
 
 <div class="max-w-2xl mx-auto space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Request Return</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Request a return for this order</p>
-        </div>
-        <a href="/orders" class="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition">
-            ← Back to Orders
-        </a>
+    <div>
+        <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+            <a href="/orders" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Orders</a>
+            <span class="mx-2 text-slate-400">/</span>
+            <span>Request Return</span>
+        </nav>
+        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Request Return</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Request a return for this order</p>
     </div>
 
     <?php if (!empty($error)): ?>

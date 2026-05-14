@@ -47,6 +47,7 @@ class ProductEditHandler implements RequestHandlerInterface
                 p.id, 
                 p.name, 
                 p.price, 
+                p.stock,
                 p.image_url,
                 p.is_active,
                 p.created_at,
@@ -67,9 +68,15 @@ class ProductEditHandler implements RequestHandlerInterface
 
             $name = trim((string) ($data['name'] ?? ''));
             $price = (float) ($data['price'] ?? 0);
+            $stock = (int) ($data['stock'] ?? 0);
             $imageUrl = trim((string)($data['image_url'] ?? ''));
 
-            if ($name === '' || $price <= 0) {
+            if ($name === '' || $price <= 0 || $stock < 0) {
+                $product['name'] = $name;
+                $product['price'] = $price;
+                $product['stock'] = $stock;
+                $product['image_url'] = $imageUrl;
+
                 $content = $this->template->render('products/edit', [
                     'product' => $product,
                     'error' => 'Invalid data',
@@ -86,6 +93,7 @@ class ProductEditHandler implements RequestHandlerInterface
                 SET
                     name = :name,
                     price = :price,
+                    stock = :stock,
                     image_url = :image_url,
                     updated_at = :updated_at
                 WHERE id = :id
@@ -93,6 +101,7 @@ class ProductEditHandler implements RequestHandlerInterface
             $update->execute([
                 ':name' => $name,
                 ':price' => $price,
+                ':stock' => $stock,
                 ':image_url' => $imageUrl !== '' ? $imageUrl : null,
                 ':updated_at' => DateTimeHelper::nowForStorage(),
                 ':id' => $id,

@@ -1,9 +1,9 @@
 <?php use App\Helper\Permission; ?>
 <!-- STATS ROW -->
 <?php if (Permission::isAllowed('admin')): ?>
-<div class='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.55fr)_minmax(0,1fr)_minmax(0,1fr)] gap-4 mb-6 items-stretch'>
+<div class='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 items-stretch'>
 <?php else: ?>
-<div class='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 items-stretch'>
+<div class='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 items-stretch'>
 <?php endif; ?>
 
     <!-- Orders Metric Selector -->
@@ -75,7 +75,7 @@
         </div>
 
         <div class='flex-1 min-h-0 flex flex-col justify-center'>
-            <p id='ordersMetricValue' class='text-[2rem] leading-none font-bold text-slate-800 dark:text-white shrink-0'>
+            <p id='ordersMetricValue' class='text-3xl leading-none font-bold text-slate-800 dark:text-white shrink-0'>
                 <?= $totalOrders ?>
             </p>
 
@@ -105,7 +105,7 @@
         </p>
 
         <div class='flex-1 min-h-0 flex flex-col justify-center'>
-            <p class='text-[2rem] leading-none font-bold <?= $returnColor ?> shrink-0'>
+            <p class='text-3xl leading-none font-bold <?= $returnColor ?> shrink-0'>
                 <?= number_format($returnRate, 1) ?>%
             </p>
 
@@ -146,17 +146,17 @@ $cancelledOffset = -($completedDash + $pendingDash);
     .dark .status-legend-label { color: #cbd5e1; }
 </style>
 
-<div class='bg-white dark:bg-slate-800 rounded-xl p-4 h-[11.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden sm:col-span-2 lg:col-span-1'>
+<div class='bg-white dark:bg-slate-800 rounded-xl p-4 h-[11.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden sm:col-span-2 lg:col-span-2'>
 
     <p class='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-none shrink-0'>
         Order Status
     </p>
 
-    <div style='flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,0.96fr) minmax(0,1.04fr);align-items:center;gap:10px;width:100%;padding-top:4px'>
+    <div style='flex:1;min-height:0;display:grid;grid-template-columns:minmax(140px,0.9fr) minmax(0,1.1fr);align-items:center;gap:14px;width:100%;padding-top:4px'>
         <svg
             viewBox='0 0 100 100'
             xmlns='http://www.w3.org/2000/svg'
-            style='width:134px;height:134px;max-width:100%;flex-shrink:0;transform:rotate(-90deg);display:block;margin:0 auto'
+            style='width:142px;height:142px;max-width:100%;flex-shrink:0;transform:rotate(-90deg);display:block;margin:0 auto'
         >
             <circle cx='50' cy='50' r='38'
                 fill='none'
@@ -241,9 +241,9 @@ $cancelledOffset = -($completedDash + $pendingDash);
     <div class='bg-white dark:bg-slate-800 rounded-xl p-4 h-[11.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden'>
         <p class='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide shrink-0'>Revenue</p>
         <div class='flex-1 min-h-0 flex flex-col justify-center'>
-            <p class='text-[2rem] leading-none font-bold text-slate-800 dark:text-white shrink-0'>$<?= number_format($revenue, 2) ?></p>
+            <p class='text-3xl leading-none font-bold text-slate-800 dark:text-white shrink-0'>$<?= number_format($revenue, 2) ?></p>
             <p class='inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 mt-4 shrink-0'>
-                <span class='text-[9px] leading-none'>&bull;</span> Completed Only
+                <span class='text-xs leading-none'>&bull;</span> Completed Only
             </p>
         </div>
     </div>
@@ -252,7 +252,7 @@ $cancelledOffset = -($completedDash + $pendingDash);
     <div class='bg-white dark:bg-slate-800 rounded-xl p-4 h-[11.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden'>
         <p class='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide shrink-0'>Total Customers</p>
         <div class='flex-1 min-h-0 flex flex-col justify-center'>
-            <p class='text-[2rem] leading-none font-bold text-slate-800 dark:text-white shrink-0'><?= $totalCustomers ?? 0 ?></p>
+            <p class='text-3xl leading-none font-bold text-slate-800 dark:text-white shrink-0'><?= $totalCustomers ?? 0 ?></p>
             <p class='text-sm text-slate-500 dark:text-slate-400 mt-4 shrink-0'>Registered customers</p>
         </div>
     </div>
@@ -464,7 +464,7 @@ foreach (($topSpendingCustomers ?? []) as $customer) {
                 </p>
                 <p class='text-sm text-slate-400 dark:text-slate-500 mt-0.5'>By total amount spent</p>
             </div>
-            <span class='inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide'>
+            <span class='inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide'>
                 $ Spend
             </span>
         </div>
@@ -591,6 +591,24 @@ foreach (($lowStockProducts ?? []) as $product) {
         background: #f59e0b;
     }
 
+    .inv-stock-qty {
+        min-width: 28px;
+        padding: 2px 7px;
+        border-radius: 6px;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 18px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dark .inv-stock-qty {
+        background: rgba(100, 116, 139, 0.18);
+        color: #cbd5e1;
+    }
+
     .inv-action-btn {
         display: inline-flex;
         align-items: center;
@@ -641,7 +659,7 @@ foreach (($lowStockProducts ?? []) as $product) {
     .dark .inv-empty-icon { background: rgba(16,185,129,0.1); }
 </style>
 
-<div class='w-full xl:w-[calc(50%-0.5rem)] bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 overflow-hidden'>
+<div class='w-full xl:w-1/2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 overflow-hidden'>
 
     <!-- Card Header -->
     <div class='flex items-start p-5 justify-between border-b border-slate-100 dark:border-slate-700'>
@@ -656,12 +674,12 @@ foreach (($lowStockProducts ?? []) as $product) {
         <?php if (!empty($lowStockProducts)): ?>
         <div data-inventory-alert-count class='inline-flex items-center gap-2 shrink-0 mt-0.5'>
             <?php if ($outOfStockAlertCount > 0): ?>
-            <span data-alert-count-badge class='inline-flex items-center gap-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 px-2.5 py-1 text-[11px] font-semibold text-red-600 dark:text-red-400 tracking-wide'>
+            <span data-alert-count-badge class='inline-flex items-center gap-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 tracking-wide'>
                 <?= $outOfStockAlertCount ?> Alert<?= $outOfStockAlertCount === 1 ? '' : 's' ?>
             </span>
             <?php endif; ?>
             <?php if ($lowStockWarningCount > 0): ?>
-            <span data-warning-count-badge class='inline-flex items-center gap-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300 tracking-wide'>
+            <span data-warning-count-badge class='inline-flex items-center gap-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 tracking-wide'>
                 <?= $lowStockWarningCount ?> Warning<?= $lowStockWarningCount === 1 ? '' : 's' ?>
             </span>
             <?php endif; ?>
@@ -698,6 +716,7 @@ foreach (($lowStockProducts ?? []) as $product) {
                 </div>
                 <div class='inv-alert-action-group'>
                     <span class='inv-stock-indicator <?= $stock === 0 ? 'is-alert' : 'is-warning' ?>' aria-hidden='true'></span>
+                    <span class='inv-stock-qty' data-alert-stock-qty data-product-id='<?= $productId ?>' aria-label='Current stock quantity'><?= $stock ?></span>
                     <button type='button' class='inv-action-btn restock-alert-btn dashboard-restock-trigger' data-product-id='<?= $productId ?>' data-product-name='<?= htmlspecialchars($productName, ENT_QUOTES) ?>'>
                         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='currentColor' style='width:12px;height:12px;flex-shrink:0'>
                             <path d='M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.263a1.75 1.75 0 0 0 0-2.474ZM4.75 14.25a.75.75 0 0 0 0-1.5H3.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5h5.25a.75.75 0 0 0 0-1.5H3.5A2 2 0 0 0 1.5 4v8.25a2 2 0 0 0 2 2h1.25Z'/>
@@ -731,7 +750,7 @@ foreach (($lowStockProducts ?? []) as $product) {
                 <input id="dashboardBuyProductId" name="product_id" type="hidden" value="">
                 <div class="flex flex-col items-center gap-2">
                     <label for="dashboardBuyQuantity" class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Units to add</label>
-                    <input id="dashboardBuyQuantity" name="quantity" type="number" min="1" step="1" required class="h-11 w-[120px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-center text-base font-semibold text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                    <input id="dashboardBuyQuantity" name="quantity" type="number" min="1" step="1" required class="h-11 w-32 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-center text-base font-semibold text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
                 </div>
 
                 <p id="dashboardBuyMessage" class="hidden text-sm font-medium"></p>
@@ -848,6 +867,9 @@ function initDashboardRestockModal() {
         document.querySelectorAll('[data-product-stock][data-product-id="' + productId + '"]').forEach(function (stockNode) {
             stockNode.textContent = String(newStock);
         });
+        document.querySelectorAll('[data-alert-stock-qty][data-product-id="' + productId + '"]').forEach(function (stockNode) {
+            stockNode.textContent = String(newStock);
+        });
     }
 
     function buildInventoryAlertCounts(rows) {
@@ -877,8 +899,8 @@ function initDashboardRestockModal() {
             badge = document.createElement('span');
             badge.dataset[type === 'Alert' ? 'alertCountBadge' : 'warningCountBadge'] = '';
             badge.className = type === 'Alert'
-                ? 'inline-flex items-center gap-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 px-2.5 py-1 text-[11px] font-semibold text-red-600 dark:text-red-400 tracking-wide'
-                : 'inline-flex items-center gap-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300 tracking-wide';
+                ? 'inline-flex items-center gap-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 tracking-wide'
+                : 'inline-flex items-center gap-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 tracking-wide';
             container.appendChild(badge);
         }
 

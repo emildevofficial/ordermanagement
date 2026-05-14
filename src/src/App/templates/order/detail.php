@@ -9,6 +9,11 @@ use App\Helper\DateTimeHelper;
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
+            <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+                <a href="/orders" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Orders</a>
+                <span class="mx-2 text-slate-400">/</span>
+                <span>Details</span>
+            </nav>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 Order Details
             </h1>
@@ -32,9 +37,6 @@ use App\Helper\DateTimeHelper;
         <div class="flex gap-3">
             <a href="/orders/<?= (int)$order['id'] ?>/edit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
                 Edit Order
-            </a>
-            <a href="/orders" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition">
-                Back to Orders
             </a>
         </div>
     </div>
@@ -105,5 +107,5 @@ use App\Helper\DateTimeHelper;
             </a>
         <?php endif; ?>
     </div>
-</div>
+        </div>
 

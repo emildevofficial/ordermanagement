@@ -16,16 +16,20 @@ $formatProductName = static function (string $name): string {
 ?>
 
 <?php if ($isAdmin): ?>
-<div class="w-full max-w-6xl px-6 py-8 space-y-6">
+<div class="w-full max-w-6xl space-y-6">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
-            Products
-        </h2>
+        <div>
+            <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+                <a href="/dashboard" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Dashboard</a>
+                <span class="mx-2 text-slate-400">/</span>
+                <span>Products</span>
+            </nav>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
+                Products
+            </h2>
+        </div>
         <div class="flex items-center gap-2">
-            <a href="/dashboard" class="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition">
-                &larr; Back to Dashboard
-            </a>
-            <a href="/products/create" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition">
+<a href="/products/create" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition">
                 + Add Product
             </a>
         </div>
@@ -109,7 +113,7 @@ $formatProductName = static function (string $name): string {
     }
 </style>
 
-<div class="w-full px-2 sm:px-4 lg:px-6 py-6 space-y-6">
+<div class="w-full space-y-6">
     <div class="flex flex-col gap-2">
         <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Shop</h2>
         <p class="text-sm text-slate-500 dark:text-slate-400">Browse available products and choose a quantity during checkout.</p>
@@ -147,7 +151,7 @@ $formatProductName = static function (string $name): string {
                             <?php if ($imageUrl !== ''): ?>
                                 <img src="<?= htmlspecialchars($imageUrl, ENT_QUOTES) ?>" alt="<?= htmlspecialchars($displayName, ENT_QUOTES) ?>" class="h-full w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-105">
                             <?php else: ?>
-                                <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.30),transparent_36%),radial-gradient(circle_at_80%_10%,rgba(16,185,129,0.18),transparent_30%),linear-gradient(145deg,rgba(15,23,42,0.25),rgba(2,6,23,0.96))]"></div>
+                                <div class="absolute inset-0 bg-slate-900"></div>
                                 <div class="absolute inset-x-4 bottom-4 top-5 rounded-lg border border-white/10 bg-white/[0.04] shadow-2xl shadow-slate-950/40"></div>
                                 <div class="absolute inset-0 flex items-center justify-center">
                                     <div class="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/80 text-3xl font-bold text-white shadow-xl shadow-slate-950/40">

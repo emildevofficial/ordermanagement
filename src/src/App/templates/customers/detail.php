@@ -30,20 +30,18 @@ $statusBadge = static function (string $status): string {
 ?>
 
 <div class="space-y-6">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
-                Customer Order Details
-            </h2>
-            <p class="text-sm text-slate-500 dark:text-slate-300 mt-1">
-                Customer profile, order totals, and purchase history.
-            </p>
-        </div>
-
-        <a href="/customers"
-           class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-            &larr; Back to Customers
-        </a>
+    <div>
+        <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+            <a href="/customers" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Customers</a>
+            <span class="mx-2 text-slate-400">/</span>
+            <span>Details</span>
+        </nav>
+        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
+            Customer Order Details
+        </h2>
+        <p class="text-sm text-slate-500 dark:text-slate-300 mt-1">
+            Customer profile, order totals, and purchase history.
+        </p>
     </div>
 
     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
@@ -98,7 +96,7 @@ $statusBadge = static function (string $status): string {
                         [$orderDate, $orderTime] = $formatDateTime($order['created_at'] ?? null);
                     ?>
                     <div class="px-5 sm:px-6 py-3">
-                        <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-3">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
                             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-3">
                                 <div>
                                     <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Order Timestamp</p>
@@ -133,7 +131,7 @@ $statusBadge = static function (string $status): string {
                                 </div>
                             </div>
 
-                            <div class="lg:min-w-[15rem]">
+                            <div class="lg:min-w-60">
                                 <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Ordered Product(s)</p>
                                 <?php if (!empty($items)): ?>
                                     <div class="mt-1 space-y-1">

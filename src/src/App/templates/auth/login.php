@@ -23,7 +23,7 @@
     </div>
 
     <!-- FORM (right) -->
-    <div class="p-8 w-[420px]">
+    <div class="p-8 w-full max-w-md">
 
         <?php if ($tab === 'register'): ?>
 

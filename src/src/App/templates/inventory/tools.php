@@ -2,15 +2,17 @@
 // expects: $products, $success, $error
 ?>
 
-<div class="w-full px-6 py-8 space-y-6">
+<div class="w-full space-y-6">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
+            <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+                <a href="/products" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Products</a>
+                <span class="mx-2 text-slate-400">/</span>
+                <span>Import / Export</span>
+            </nav>
             <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Import / Export</h2>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Import, export, and bulk edit product inventory using CSV files.</p>
+            <!-- <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Import, export, and bulk edit product inventory using CSV files.</p> -->
         </div>
-        <a href="/products" class="inline-flex items-center justify-center rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600">
-            Back to Products
-        </a>
     </div>
 
     <?php if (!empty($success)): ?>
@@ -25,9 +27,9 @@
         </div>
     <?php endif; ?>
 
-    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2 grid-rows-2">
-        <section class="rounded-xl border border-slate-700/70 bg-slate-900/95 bg-[linear-gradient(135deg,rgba(30,41,59,0.98),rgba(15,23,42,0.96))] px-4 py-3 shadow-lg shadow-slate-950/20 transition hover:border-indigo-500/50">
-            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <section class="rounded-xl border border-slate-700/70 bg-slate-900 p-5 shadow-lg shadow-slate-950/20 transition hover:border-indigo-500/50">
+            <div class="flex h-full flex-col gap-4">
                 <div class="flex min-w-0 items-center gap-3">
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-400/20 bg-indigo-500/10 text-indigo-300">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,19 +42,19 @@
                         <!-- <p class="mt-1 text-sm text-slate-400">Download all real products from inventory.</p> -->
                     </div>
                 </div>
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <a href="/import-export/export" class="inline-flex shrink-0 items-center justify-center rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-950/30 transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
+                <div class="grid w-full grid-cols-1 gap-2 sm:w-fit sm:grid-cols-2">
+                    <a href="/import-export/export" class="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-indigo-600 px-3.5 text-sm font-semibold text-white shadow-sm shadow-indigo-950/30 transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
                         Export CSV
                     </a>
-                    <a href="/import-export/export-xlsx" class="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-600 bg-slate-950/80 px-3.5 py-2 text-sm font-semibold text-slate-100 shadow-sm shadow-slate-950/20 transition hover:border-indigo-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
+                    <a href="/import-export/export-xlsx" class="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg border border-slate-600 bg-slate-950/80 px-3.5 text-sm font-semibold text-slate-100 shadow-sm shadow-slate-950/20 transition hover:border-indigo-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
                         Export XLSX
                     </a>
                 </div>
             </div>
         </section>
 
-        <section class="rounded-xl border border-slate-700/70 bg-slate-900/95 bg-[linear-gradient(135deg,rgba(30,41,59,0.98),rgba(15,23,42,0.96))] px-4 py-3 shadow-lg shadow-slate-950/20 transition hover:border-indigo-500/50">
-            <form method="POST" action="/import-export/import" enctype="multipart/form-data" class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <section class="rounded-xl border border-slate-700/70 bg-slate-900 p-5 shadow-lg shadow-slate-950/20 transition hover:border-indigo-500/50">
+            <form method="POST" action="/import-export/import" enctype="multipart/form-data" class="flex h-full flex-col gap-4">
                 <div class="flex min-w-0 items-center gap-3">
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-500/10 text-emerald-300">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,8 +69,8 @@
                         <!-- <p class="mt-1 max-w-md text-xs leading-5 text-slate-500">Template file is only for import format. To download all real products, use Export CSV or Export XLSX.</p> -->
                     </div>
                 </div>
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <a href="/import-export/sample" class="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-600 bg-slate-950/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm shadow-slate-950/20 transition hover:border-indigo-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
+                <div class="flex w-full flex-col gap-2 md:flex-row md:flex-wrap md:items-center">
+                    <a href="/import-export/sample" class="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-lg border border-slate-600 bg-slate-950/80 px-3 text-xs font-semibold text-slate-100 shadow-sm shadow-slate-950/20 transition hover:border-indigo-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
                         Download Import Template
                     </a>
                     <input
@@ -76,9 +78,9 @@
                         name="products_csv"
                         accept=".csv,text/csv"
                         required
-                        class="block w-full max-w-xs text-sm text-slate-300 file:mr-3 file:rounded-lg file:border file:border-slate-600 file:bg-slate-950 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-100 file:transition hover:file:border-indigo-400 hover:file:bg-slate-800"
+                        class="block min-w-0 flex-1 text-sm text-slate-300 file:mr-3 file:h-10 file:rounded-lg file:border file:border-slate-600 file:bg-slate-950 file:px-3 file:text-sm file:font-semibold file:text-slate-100 file:transition hover:file:border-indigo-400 hover:file:bg-slate-800"
                     >
-                    <button type="submit" class="inline-flex shrink-0 items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-950/30 transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
+                    <button type="submit" class="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm shadow-indigo-950/30 transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
                         Import CSV
                     </button>
                 </div>

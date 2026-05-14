@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Handler\Auth\LoginHandler;
 use App\Handler\Auth\RegisterHandler;
 use App\Handler\Auth\LogoutHandler;
+use App\Handler\Analytics\AnalyticsHandler;
 use App\Handler\Dashboard\DashboardHandler;
 use App\Handler\Order\OrderListHandler;
 use App\Handler\Order\OrderCreateHandler;
@@ -61,6 +62,12 @@ $app->get('/logout', LogoutHandler::class, 'logout');
         RoleMiddleware::class,
         DashboardHandler::class,
     ], 'dashboard');
+
+    $app->get('/analytics', [
+        AuthMiddleware::class,
+        RoleMiddleware::class,
+        AnalyticsHandler::class,
+    ], 'analytics');
 
     $app->get('/orders', [
         AuthMiddleware::class,

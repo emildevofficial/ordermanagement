@@ -1,9 +1,42 @@
 <!DOCTYPE html>
-<html lang='en' class='light'>
+<html lang='en'>
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Orders · Admin</title>
+    <meta name='color-scheme' content='light dark'>
+    <script>
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = { darkMode: 'class' };
+
+        (function () {
+            var theme = null;
+
+            try {
+                theme = localStorage.getItem('theme');
+            } catch (e) {
+                theme = null;
+            }
+
+            var prefersDark = false;
+
+            try {
+                prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            } catch (e) {
+                prefersDark = false;
+            }
+
+            var useDark = theme === 'dark' || (theme !== 'light' && prefersDark);
+            document.documentElement.classList.toggle('dark', useDark);
+            document.documentElement.style.backgroundColor = useDark ? '#0f172a' : '#f8fafc';
+        })();
+    </script>
+    <style>
+        html { background: #f8fafc; }
+        html.dark { background: #0f172a; }
+        body { background: #f8fafc; }
+        html.dark body { background: #0f172a; }
+    </style>
     <script src='https://cdn.tailwindcss.com'></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -14,17 +47,17 @@
         .peer:checked ~ .profile-dropdown { display: block; }
     </style>
     <script>
-        tailwind.config = { darkMode: 'class' };
         window.addEventListener('load', function() {
             const toggle = document.getElementById('darkToggle');
             if (toggle) {
                 toggle.addEventListener('click', () => {
                     document.documentElement.classList.toggle('dark');
-                    localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                    document.documentElement.style.backgroundColor = document.documentElement.classList.contains('dark') ? '#0f172a' : '#f8fafc';
+                    try {
+                        localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                    } catch (e) {
+                    }
                 });
-            }
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
             }
             document.addEventListener('click', function(e) {
                 const dropdown = document.getElementById('profileDropdownToggle');
@@ -66,6 +99,13 @@
                     <div class='flex items-center gap-3 px-4 py-3 <?= ($currentRoute ?? '') === "orders" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700" ?> rounded-xl transition cursor-pointer'>
                         <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'/></svg>
                         <span class='flex-1'>Orders</span>
+                    </div>
+                </a>
+
+                <a href='/analytics' class='block w-full'>
+                    <div class='flex items-center gap-3 px-4 py-3 <?= ($currentRoute ?? '') === "analytics" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700" ?> rounded-xl transition cursor-pointer'>
+                        <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 19V5m0 14h16M8 16V9m4 7V7m4 9v-4'/></svg>
+                        <span>Analytics</span>
                     </div>
                 </a>
 
@@ -180,7 +220,7 @@
         </header>
 
         <!-- PAGE CONTENT -->
-        <main id='main-content' class='p-8'>
+        <main id='main-content' class='p-10'>
             <?= $content ?>
         </main>
 

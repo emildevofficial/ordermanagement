@@ -6,32 +6,19 @@ use App\Helper\DateTimeHelper;
 $isAdmin = Permission::isAllowed('admin');
 ?>
 
-<div class="w-full lg:w-[72rem] lg:max-w-full px-0 py-8 space-y-6">
+<div class="w-full max-w-6xl space-y-6">
     <div class="flex items-center justify-between">
         <div>
+            <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+                <a href="<?= $isAdmin ? '/dashboard' : '/shop' ?>" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"><?= $isAdmin ? 'Dashboard' : 'Shop' ?></a>
+                <span class="mx-2 text-slate-400">/</span>
+                <span>Orders</span>
+            </nav>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100">Orders</h1>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <?php if ($isAdmin): ?>
-            <a href="/dashboard"
-               class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition">
-                ← Back to Dashboard
-            </a>
-            <?php endif; ?>
-            <?php if (!$isAdmin): ?>
-            <a href="/shop"
-               class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7M3 12h18" />
-                </svg>
-                Go Back to Shop
-            </a>
-            <?php endif; ?>
         </div>
     </div>
 
-    <div class="w-full ml-6 bg-white dark:bg-slate-800 rounded-xl shadow p-6">
+    <div class="w-full bg-white dark:bg-slate-800 rounded-xl shadow p-6">
         <div class="flex items-center justify-end mb-4">
             <span class="text-sm text-gray-500 dark:text-slate-300">
                 Total: <?= (int)$orderCount ?>

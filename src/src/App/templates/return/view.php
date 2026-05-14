@@ -41,20 +41,19 @@ foreach ($orderItems as $item) {
 $orderedItemsText = !empty($orderedItems) ? implode(', ', $orderedItems) : 'No order items found.';
 ?>
 
-<div class="max-w-2xl p-8 space-y-5">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">
-                Return Details
-            </h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                <?= $isAdmin ? 'Detailed return management and order review.' : 'Your return request and order summary.' ?>
-            </p>
-        </div>
-        <a href="/returns"
-           class="inline-flex items-center justify-center bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-100 transition">
-            Back to Returns
-        </a>
+<div class="max-w-2xl space-y-5">
+    <div>
+        <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+            <a href="/returns" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Returns</a>
+            <span class="mx-2 text-slate-400">/</span>
+            <span>Details</span>
+        </nav>
+        <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">
+            Return Details
+        </h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <?= $isAdmin ? 'Detailed return management and order review.' : 'Your return request and order summary.' ?>
+        </p>
     </div>
 
     <div class="space-y-2">

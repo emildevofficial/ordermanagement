@@ -1,13 +1,12 @@
-<div class="max-w-lg ml-4 space-y-4">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900">Create Product</h1>
-            <p class="text-sm text-slate-500 mt-1">Add new product to inventory</p>
-        </div>
-        <a href="/products"
-           class="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition">
-           ← Back to Products
-        </a>
+<div class="max-w-lg space-y-4">
+    <div>
+        <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+            <a href="/products" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Products</a>
+            <span class="mx-2 text-slate-400">/</span>
+            <span>Create</span>
+        </nav>
+        <h1 class="text-xl font-bold text-slate-900">Create Product</h1>
+        <p class="text-sm text-slate-500 mt-1">Add new product to inventory</p>
     </div>
 
     <?php if (!empty($error)): ?>
@@ -49,7 +48,7 @@
             </div>
         </form>
     </div>
-</div>
+    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
