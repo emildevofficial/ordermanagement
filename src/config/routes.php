@@ -14,7 +14,7 @@ use App\Handler\Order\OrderDetailHandler;
 use App\Handler\Order\OrderStatusActionHandler;
 use App\Middleware\AuthMiddleware;
 use Mezzio\Application;
-use Mezzio\MiddlewareFactory; // 🔥 KJO MUNGONTE
+use Mezzio\MiddlewareFactory; 
 use Psr\Container\ContainerInterface;
 use App\Handler\Profile\ProfileHandler;
 use App\Handler\Profile\EditProfileHandler;
@@ -25,17 +25,23 @@ use App\Handler\Settings\SettingsHandler;
 use App\Handler\Customer\CustomerCreateHandler;
 use App\Handler\Customer\CustomerDetailHandler;
 use App\Middleware\RoleMiddleware;
+use App\Handler\Product\InventoryToolsHandler;
+use App\Handler\Product\ProductExportHandler;
+use App\Handler\Product\ProductExportXlsxHandler;
+use App\Handler\Product\ProductImportHandler;
+use App\Handler\Product\ProductImportSampleHandler;
+use App\Handler\Product\ProductBulkEditHandler;
 
 
 return static function (
     Application $app,
-    MiddlewareFactory $factory,   // 🔥 KJO MUNGONTE
+    MiddlewareFactory $factory,   
     ContainerInterface $container
 ): void {
 
   
-$app->get('/',        LoginHandler::class, 'home');     // ose direkt /login
-$app->get('/login',   LoginHandler::class, 'login');    // 🔥 UI këtu
+$app->get('/',        LoginHandler::class, 'home');     
+$app->get('/login',   LoginHandler::class, 'login');    
 
 // ── POST actions ─────────────────────────────────
 $app->post('/login',    LoginHandler::class,    'login.post');
@@ -60,6 +66,11 @@ $app->get('/logout', LogoutHandler::class, 'logout');
         AuthMiddleware::class,
         OrderListHandler::class,
     ], 'orders.list');
+
+    $app->get('/my-orders', [
+        AuthMiddleware::class,
+        OrderListHandler::class,
+    ], 'orders.my-list');
 
    $app->get('/orders/create', [
     AuthMiddleware::class,
@@ -132,13 +143,23 @@ $app->post('/profile/password', [
     ChangePasswordHandler::class,
 ]);
 
-$app->get('/customers', CustomerListHandler::class, 'customers.list');
+$app->get('/customers', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
+    CustomerListHandler::class,
+], 'customers.list');
 
 $app->route('/customers/create', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
     CustomerCreateHandler::class
 ], ['GET', 'POST'], 'customers.create');
 
-$app->get('/customers/{id:\d+}', CustomerDetailHandler::class, 'customers.detail');
+$app->get('/customers/{id:\d+}', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
+    CustomerDetailHandler::class,
+], 'customers.detail');
 
 
 $app->get('/settings', [
@@ -152,7 +173,48 @@ $app->post('/settings', [
 ], 'settings.post');
 
 // Product routes
+$app->get('/inventory-tools', function () {
+    return new \Laminas\Diactoros\Response\RedirectResponse('/import-export');
+}, 'inventory-tools.redirect');
+
+$app->get('/import-export', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
+    InventoryToolsHandler::class,
+], 'import-export');
+
+$app->get('/import-export/export', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
+    ProductExportHandler::class,
+], 'import-export.export');
+
+$app->get('/import-export/export-xlsx', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
+    ProductExportXlsxHandler::class,
+], 'import-export.export-xlsx');
+
+$app->get('/import-export/sample', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
+    ProductImportSampleHandler::class,
+], 'import-export.sample');
+
+$app->post('/import-export/import', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
+    ProductImportHandler::class,
+], 'import-export.import');
+
+$app->post('/import-export/bulk-edit', [
+    AuthMiddleware::class,
+    RoleMiddleware::class,
+    ProductBulkEditHandler::class,
+], 'import-export.bulk-edit');
+
 $app->route('/products/create', [
+    AuthMiddleware::class,
     \App\Handler\Product\ProductCreateHandler::class
 ], ['GET','POST'], 'products.create');
 

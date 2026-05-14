@@ -22,6 +22,15 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Product Name</label>
                 <input name="name" required placeholder="Product name" class="w-full h-10 px-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
             </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Product Image URL</label>
+                <input id="productImageUrl" name="image_url" type="url" placeholder="Paste image link here" class="w-full h-10 px-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <div id="productImagePreviewBox" class="mt-3 flex min-h-32 items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-center text-sm text-slate-500 dark:text-slate-400">
+                    <span id="productImagePreviewText">Image preview will appear here</span>
+                    <img id="productImagePreview" src="" alt="Product image preview" class="hidden max-h-40 max-w-full rounded-lg object-contain">
+                </div>
+            </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -41,3 +50,33 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('productImageUrl');
+    var preview = document.getElementById('productImagePreview');
+    var placeholder = document.getElementById('productImagePreviewText');
+
+    if (!input || !preview || !placeholder) return;
+
+    function hidePreview() {
+        preview.removeAttribute('src');
+        preview.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+    }
+
+    input.addEventListener('input', function () {
+        var url = input.value.trim();
+        if (url === '') {
+            hidePreview();
+            return;
+        }
+
+        placeholder.classList.add('hidden');
+        preview.classList.remove('hidden');
+        preview.src = url;
+    });
+
+    preview.addEventListener('error', hidePreview);
+});
+</script>

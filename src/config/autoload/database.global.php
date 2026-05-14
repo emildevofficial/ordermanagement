@@ -19,10 +19,10 @@ if ($databaseUrl !== '') {
 
 return [
     'database' => [
-        'host' => getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: ($urlConfig['host'] ?? ''),
+        'host' => getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: ($urlConfig['host'] ?? 'mysql'),
         'port' => (int) (getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: ($urlConfig['port'] ?? 3306)),
-        'dbname' => getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: ($urlConfig['dbname'] ?? ''),
-        'user' => getenv('DB_USER') ?: getenv('MYSQLUSER') ?: ($urlConfig['user'] ?? ''),
+        'dbname' => getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: ($urlConfig['dbname'] ?? 'order_management'),
+        'user' => getenv('DB_USER') ?: getenv('MYSQLUSER') ?: ($urlConfig['user'] ?? 'root'),
         'password' => getenv('DB_PASS') ?: getenv('MYSQLPASSWORD') ?: ($urlConfig['password'] ?? ''),
     ],
 ];

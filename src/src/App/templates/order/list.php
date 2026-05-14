@@ -4,16 +4,6 @@ use App\Helper\Permission;
 use App\Helper\DateTimeHelper;
 
 $isAdmin = Permission::isAllowed('admin');
-$returnOrderId = null;
-
-if (!$isAdmin) {
-    foreach ($orders as $orderOption) {
-        if (empty($orderOption['has_return'])) {
-            $returnOrderId = (int)$orderOption['id'];
-            break;
-        }
-    }
-}
 ?>
 
 <div class="w-full lg:w-[72rem] lg:max-w-full px-0 py-8 space-y-6">
@@ -30,19 +20,12 @@ if (!$isAdmin) {
             </a>
             <?php endif; ?>
             <?php if (!$isAdmin): ?>
-            <button type="button"
-                class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-500"
-                title="Return Order"
-                data-return-modal-open
-                data-order-id="<?= (int)($returnOrderId ?? 0) ?>">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-                </svg>
-                <span>Return Order</span>
-            </button>
             <a href="/shop"
-               class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition">
-                + Shop Products
+               class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7M3 12h18" />
+                </svg>
+                Go Back to Shop
             </a>
             <?php endif; ?>
         </div>
@@ -73,6 +56,7 @@ if (!$isAdmin) {
                         <?php else: ?>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">TOTAL ($)</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Actions</th>
                         <?php endif; ?>
                         <?php if ($isAdmin): ?>
                         <th class="px-6 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Actions</th>
@@ -136,6 +120,39 @@ if (!$isAdmin) {
                                         <?= htmlspecialchars(ucfirst($status)) ?>
                                     </span>
                                 </td>
+                                <?php if (!$isAdmin): ?>
+                                <td class="px-6 py-4">
+                                    <?php
+                                        $returnStatus = (string)($order['return_status'] ?? '');
+                                    ?>
+                                    <?php if (!empty($order['can_return'])): ?>
+                                        <button type="button"
+                                            class="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-500"
+                                            title="Return"
+                                            data-return-modal-open
+                                            data-order-id="<?= (int)$order['id'] ?>">
+                                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                                            </svg>
+                                            <span>Return</span>
+                                        </button>
+                                    <?php elseif ($returnStatus !== ''): ?>
+                                        <button type="button"
+                                            class="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-500"
+                                            data-return-details-open
+                                            data-return-status="<?= htmlspecialchars(ucfirst($returnStatus), ENT_QUOTES) ?>"
+                                            data-return-reason="<?= htmlspecialchars((string)($order['return_reason'] ?? ''), ENT_QUOTES) ?>"
+                                            data-return-admin-notes="<?= htmlspecialchars((string)($order['return_admin_notes'] ?? ''), ENT_QUOTES) ?>"
+                                            data-return-created-at="<?= htmlspecialchars(!empty($order['return_created_at']) ? DateTimeHelper::format($order['return_created_at'], 'M d, Y h:i A') : '', ENT_QUOTES) ?>"
+                                            data-return-updated-at="<?= htmlspecialchars(!empty($order['return_updated_at']) ? DateTimeHelper::format($order['return_updated_at'], 'M d, Y h:i A') : '', ENT_QUOTES) ?>">
+                                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                                            </svg>
+                                            Return
+                                        </button>
+                                    <?php endif; ?>
+                                </td>
+                                <?php endif; ?>
                                 <?php if ($isAdmin): ?>
                                 <td class="px-6 py-4 text-gray-700 dark:text-slate-200">
                                     <?= htmlspecialchars(number_format((float)($order['total'] ?? 0), 2)) ?>
@@ -167,7 +184,7 @@ if (!$isAdmin) {
                     <?php else: ?>
                         <tr>
 
-                            <td colspan="<?= $isAdmin ? 7 : 5 ?>" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-slate-300">
+                            <td colspan="<?= $isAdmin ? 7 : 6 ?>" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-slate-300">
                                 No orders found.
                             </td>
 
@@ -180,6 +197,43 @@ if (!$isAdmin) {
 </div>
 
 <?php if (!$isAdmin): ?>
+<div id="returnDetailsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6" aria-hidden="true">
+    <div class="w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 text-slate-100 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-700 px-6 py-4">
+            <h2 class="text-lg font-semibold">Return request confirmation</h2>
+            <button type="button" class="text-slate-400 transition hover:text-white" data-return-details-close aria-label="Close return details modal">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="space-y-4 px-6 py-5">
+            <div class="flex items-center gap-3 text-sm text-slate-200">
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded border border-indigo-500 bg-indigo-500/20 text-indigo-300">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </span>
+                <span>I confirm my return request</span>
+            </div>
+
+            <div>
+                <label for="returnDetailsReason" class="block text-sm font-medium text-slate-200">Please enter the respective reason:</label>
+                <textarea id="returnDetailsReason" rows="5" readonly class="mt-3 min-h-28 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"></textarea>
+                <p id="returnDetailsStatus" class="mt-2 text-xs font-medium text-slate-400"></p>
+                <p id="returnDetailsAdminNotes" class="mt-1 text-xs font-medium text-slate-400"></p>
+            </div>
+
+            <div class="flex justify-center pt-1">
+                <button type="button" data-return-details-proceed class="min-w-40 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500">
+                    Proceed
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="returnRequestModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6" aria-hidden="true">
     <div class="w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 text-slate-100 shadow-2xl">
         <div class="flex items-center justify-between border-b border-slate-700 px-6 py-4">
@@ -295,6 +349,60 @@ document.addEventListener('DOMContentLoaded', function () {
                 errorText.classList.remove('hidden');
                 reasonInput.focus();
             }
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('returnDetailsModal');
+    var statusText = document.getElementById('returnDetailsStatus');
+    var reasonText = document.getElementById('returnDetailsReason');
+    var adminNotesText = document.getElementById('returnDetailsAdminNotes');
+    var proceedButton = modal ? modal.querySelector('[data-return-details-proceed]') : null;
+
+    if (!modal || !statusText || !reasonText || !adminNotesText || !proceedButton) {
+        return;
+    }
+
+    function setOpen(isOpen) {
+        modal.classList.toggle('hidden', !isOpen);
+        modal.classList.toggle('flex', isOpen);
+        modal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        document.body.classList.toggle('overflow-hidden', isOpen);
+    }
+
+    document.querySelectorAll('[data-return-details-open]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var status = button.dataset.returnStatus || 'Pending';
+            var reason = button.dataset.returnReason || 'No reason provided.';
+            var adminNotes = button.dataset.returnAdminNotes || 'No admin response yet.';
+
+            statusText.textContent = 'Current status: Return ' + status;
+            reasonText.value = reason;
+            adminNotesText.textContent = 'Admin response: ' + adminNotes;
+            setOpen(true);
+        });
+    });
+
+    proceedButton.addEventListener('click', function () {
+        setOpen(false);
+    });
+
+    document.querySelectorAll('[data-return-details-close]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            setOpen(false);
+        });
+    });
+
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            setOpen(false);
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+            setOpen(false);
         }
     });
 });

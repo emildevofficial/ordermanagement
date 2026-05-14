@@ -34,7 +34,7 @@ class ProductEditHandler implements RequestHandlerInterface
         }
 
         $pdo = $this->db->getPdo();
-        $this->ensureProductTimestampColumns($pdo);
+        $this->ensureProductColumns($pdo);
 
         $id = (int) ($request->getAttribute('id') ?? 0);
         if ($id <= 0) {
@@ -47,6 +47,7 @@ class ProductEditHandler implements RequestHandlerInterface
                 p.id, 
                 p.name, 
                 p.price, 
+                p.image_url,
                 p.is_active,
                 p.created_at,
                 p.updated_at
@@ -66,6 +67,7 @@ class ProductEditHandler implements RequestHandlerInterface
 
             $name = trim((string) ($data['name'] ?? ''));
             $price = (float) ($data['price'] ?? 0);
+            $imageUrl = trim((string)($data['image_url'] ?? ''));
 
             if ($name === '' || $price <= 0) {
                 $content = $this->template->render('products/edit', [
@@ -84,12 +86,14 @@ class ProductEditHandler implements RequestHandlerInterface
                 SET
                     name = :name,
                     price = :price,
+                    image_url = :image_url,
                     updated_at = :updated_at
                 WHERE id = :id
             ");
             $update->execute([
                 ':name' => $name,
                 ':price' => $price,
+                ':image_url' => $imageUrl !== '' ? $imageUrl : null,
                 ':updated_at' => DateTimeHelper::nowForStorage(),
                 ':id' => $id,
             ]);
@@ -107,12 +111,19 @@ class ProductEditHandler implements RequestHandlerInterface
         ]));
     }
 
-    private function ensureProductTimestampColumns(\PDO $pdo): void
+    private function ensureProductColumns(\PDO $pdo): void
     {
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM products LIKE 'updated_at'");
-        $stmt->execute();
-        if (!$stmt->fetch()) {
-            $pdo->exec("ALTER TABLE products ADD COLUMN updated_at DATETIME NULL");
+        $columns = [
+            'updated_at' => "ALTER TABLE products ADD COLUMN updated_at DATETIME NULL",
+            'image_url' => "ALTER TABLE products ADD COLUMN image_url VARCHAR(500) NULL",
+        ];
+
+        foreach ($columns as $column => $sql) {
+            $stmt = $pdo->prepare("SHOW COLUMNS FROM products LIKE :column");
+            $stmt->execute([':column' => $column]);
+            if (!$stmt->fetch()) {
+                $pdo->exec($sql);
+            }
         }
     }
 }

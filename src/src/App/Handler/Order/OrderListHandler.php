@@ -46,7 +46,49 @@ class OrderListHandler implements RequestHandlerInterface
                     COALESCE(c.email, u.email, '') AS customer_email,
                     p.name AS product_name,
                     oi.quantity,
-                    EXISTS(SELECT 1 FROM returns r WHERE r.order_id = o.id) AS has_return
+                    EXISTS(SELECT 1 FROM returns r WHERE r.order_id = o.id) AS has_return,
+                    (
+                        SELECT r.status
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_status,
+                    (
+                        SELECT r.id
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_id,
+                    (
+                        SELECT r.reason
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_reason,
+                    (
+                        SELECT r.admin_notes
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_admin_notes,
+                    (
+                        SELECT r.created_at
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_created_at,
+                    (
+                        SELECT r.updated_at
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_updated_at
                 FROM orders o
                 LEFT JOIN users u ON u.id = o.user_id
                 LEFT JOIN customers c ON o.customer_id = c.id
@@ -67,7 +109,49 @@ class OrderListHandler implements RequestHandlerInterface
                     u.email AS customer_email,
                     p.name AS product_name,
                     oi.quantity,
-                    EXISTS(SELECT 1 FROM returns r WHERE r.order_id = o.id) AS has_return
+                    EXISTS(SELECT 1 FROM returns r WHERE r.order_id = o.id) AS has_return,
+                    (
+                        SELECT r.status
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_status,
+                    (
+                        SELECT r.id
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_id,
+                    (
+                        SELECT r.reason
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_reason,
+                    (
+                        SELECT r.admin_notes
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_admin_notes,
+                    (
+                        SELECT r.created_at
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_created_at,
+                    (
+                        SELECT r.updated_at
+                        FROM returns r
+                        WHERE r.order_id = o.id
+                        ORDER BY r.created_at DESC
+                        LIMIT 1
+                    ) AS return_updated_at
                 FROM orders o
                 JOIN users u ON o.user_id = u.id
                 LEFT JOIN order_items oi ON oi.order_id = o.id
@@ -85,9 +169,7 @@ class OrderListHandler implements RequestHandlerInterface
             $hasReturn = !empty($order['has_return']);
 
             $order['can_cancel'] = $status === 'pending';
-            $order['can_return'] = !$isAdmin
-                && in_array($status, ['completed', 'delivered'], true)
-                && !$hasReturn;
+            $order['can_return'] = !$isAdmin && !$hasReturn;
         }
         unset($order);
 

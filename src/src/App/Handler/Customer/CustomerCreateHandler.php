@@ -6,6 +6,7 @@ namespace App\Handler\Customer;
 
 use App\Database\Database;
 use App\Helper\DateTimeHelper;
+use App\Helper\Permission;
 use App\Helper\Session;
 use App\Helper\Template;
 use Laminas\Diactoros\Response\HtmlResponse;
@@ -26,6 +27,11 @@ class CustomerCreateHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         Session::start();
+
+        $deny = Permission::requireRole('admin');
+        if ($deny !== null) {
+            return $deny;
+        }
 
         if ($request->getMethod() === 'POST') {
             $data = $request->getParsedBody();

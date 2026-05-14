@@ -29,7 +29,7 @@ class ProductListHandler implements RequestHandlerInterface
         $this->ensureProductMetadataColumns($pdo);
 
         $stmt = $pdo->prepare("
-            SELECT id, name, price, stock, is_active, created_at, updated_at, last_restocked_at, restock_count
+            SELECT id, name, price, stock, image_url, is_active, created_at, updated_at, last_restocked_at, restock_count
             FROM products
             ORDER BY id DESC
         ");
@@ -61,6 +61,7 @@ class ProductListHandler implements RequestHandlerInterface
             'last_restocked_at' => "ALTER TABLE products ADD COLUMN last_restocked_at DATETIME NULL",
             'restock_count' => "ALTER TABLE products ADD COLUMN restock_count INT NOT NULL DEFAULT 0",
             'updated_at' => "ALTER TABLE products ADD COLUMN updated_at DATETIME NULL",
+            'image_url' => "ALTER TABLE products ADD COLUMN image_url VARCHAR(500) NULL",
         ];
 
         foreach ($columns as $column => $sql) {

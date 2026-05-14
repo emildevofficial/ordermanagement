@@ -52,6 +52,7 @@
         </div>
         <nav class='flex-1 py-6 px-3 space-y-1 overflow-y-auto'>
             <?php use App\Helper\Permission; $isAdmin = Permission::isAllowed('admin'); ?>
+            <?php $displayUserName = ($role ?? '') === 'admin' ? 'Owner' : ($userName ?? 'Admin'); ?>
 
             <?php if ($isAdmin): ?>
                 <a href='/dashboard' class='block w-full'>
@@ -86,6 +87,13 @@
                     <div class='flex items-center gap-3 px-4 py-3 <?= ($currentRoute ?? '') === "customers" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700" ?> rounded-xl transition cursor-pointer'>
                         <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'/></svg>
                         <span>Customers</span>
+                    </div>
+                </a>
+
+                <a href='/import-export' class='block w-full'>
+                    <div class='flex items-center gap-3 px-4 py-3 <?= ($currentRoute ?? '') === "import-export" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700" ?> rounded-xl transition cursor-pointer'>
+                        <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 7h16M4 17h16M7 10l3 3 3-3M10 13V4M17 14l-3-3-3 3M14 11v9'/></svg>
+                        <span>Import / Export</span>
                     </div>
                 </a>
 
@@ -147,12 +155,13 @@
                 <div class='relative' id='profileDropdownToggle'>
                     <input type='checkbox' id='profileCheckbox' class='peer hidden'>
                     <label for='profileCheckbox' class='flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700 cursor-pointer'>
-                        <div class='w-9 h-9 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm'>
-                            <?= strtoupper(substr($userName ?? 'A', 0, 1)) ?>
+                        <div class='w-9 h-9 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white'>
+                            <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' aria-hidden='true'>
+                                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'/>
+                            </svg>
                         </div>
                         <div class='text-left hidden sm:block'>
-                            <p class='text-sm font-medium text-slate-800 dark:text-white'><?= htmlspecialchars($userName ?? 'Admin') ?></p>
-                            <p class='text-xs text-slate-500 dark:text-slate-400 capitalize'><?= htmlspecialchars($role ?? 'admin') ?></p>
+                            <p class='text-sm font-medium text-slate-800 dark:text-white'><?= htmlspecialchars($displayUserName) ?></p>
                         </div>
                         <svg class='w-4 h-4 text-slate-400 transition-transform peer-checked:rotate-180' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/></svg>
                     </label>

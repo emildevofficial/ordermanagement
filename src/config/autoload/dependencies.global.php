@@ -95,6 +95,34 @@ CustomerDetailHandler::class => CustomerDetailHandlerFactory::class,
 \App\Handler\Product\ProductToggleHandler::class => \App\Handler\Product\ProductToggleHandlerFactory::class,
 \App\Handler\Product\ProductCreateHandler::class => \App\Handler\Product\ProductCreateHandlerFactory::class,
 \App\Handler\Product\ProductEditHandler::class => \App\Handler\Product\ProductEditHandlerFactory::class,
+\App\Handler\Product\InventoryToolsHandler::class => function ($container) {
+    return new \App\Handler\Product\InventoryToolsHandler(
+        $container->get(Database::class)
+    );
+},
+\App\Handler\Product\ProductExportHandler::class => function ($container) {
+    return new \App\Handler\Product\ProductExportHandler(
+        $container->get(Database::class)
+    );
+},
+\App\Handler\Product\ProductExportXlsxHandler::class => function ($container) {
+    return new \App\Handler\Product\ProductExportXlsxHandler(
+        $container->get(Database::class)
+    );
+},
+\App\Handler\Product\ProductImportSampleHandler::class => function ($container) {
+    return new \App\Handler\Product\ProductImportSampleHandler();
+},
+\App\Handler\Product\ProductImportHandler::class => function ($container) {
+    return new \App\Handler\Product\ProductImportHandler(
+        $container->get(Database::class)
+    );
+},
+\App\Handler\Product\ProductBulkEditHandler::class => function ($container) {
+    return new \App\Handler\Product\ProductBulkEditHandler(
+        $container->get(Database::class)
+    );
+},
 
 // Return handlers
 \App\Handler\Return\ReturnListHandler::class => \App\Handler\Return\ReturnListHandlerFactory::class,

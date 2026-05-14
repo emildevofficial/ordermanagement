@@ -25,6 +25,15 @@
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Product Name</label>
                 <input name="name" required value="<?= htmlspecialchars($product['name'] ?? '') ?>" placeholder="Product name" class="w-[272px] max-w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
             </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Product Image URL</label>
+                <input id="productImageUrl" name="image_url" type="url" value="<?= htmlspecialchars($product['image_url'] ?? '') ?>" placeholder="Paste image link here" class="w-[272px] max-w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <div id="productImagePreviewBox" class="mt-3 flex min-h-32 w-[272px] max-w-full items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-center text-sm text-slate-500 dark:text-slate-400">
+                    <span id="productImagePreviewText">Image preview will appear here</span>
+                    <img id="productImagePreview" src="" alt="Product image preview" class="hidden max-h-40 max-w-full rounded-lg object-contain">
+                </div>
+            </div>
             
             <div>
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Price ($)</label>
@@ -38,3 +47,41 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('productImageUrl');
+    var preview = document.getElementById('productImagePreview');
+    var placeholder = document.getElementById('productImagePreviewText');
+
+    if (!input || !preview || !placeholder) return;
+
+    function hidePreview() {
+        preview.removeAttribute('src');
+        preview.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+    }
+
+    function showPreview(url) {
+        placeholder.classList.add('hidden');
+        preview.classList.remove('hidden');
+        preview.src = url;
+    }
+
+    input.addEventListener('input', function () {
+        var url = input.value.trim();
+        if (url === '') {
+            hidePreview();
+            return;
+        }
+
+        showPreview(url);
+    });
+
+    preview.addEventListener('error', hidePreview);
+
+    if (input.value.trim() !== '') {
+        showPreview(input.value.trim());
+    }
+});
+</script>

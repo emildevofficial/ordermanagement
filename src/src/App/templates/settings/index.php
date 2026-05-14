@@ -3,9 +3,10 @@
  * @var string $userName
  * @var string $role
  */
+$displayRoleLabel = ($role ?? '') === 'admin' ? 'Owner' : (($role ?? '') === 'user' ? 'Customer' : ucfirst((string)($role ?? '')));
 ?>
 
-<div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl">
 
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
@@ -38,8 +39,8 @@
 
                 <div>
                     <p class="text-xs text-slate-500 uppercase">Role</p>
-                    <p class="text-slate-900 dark:text-white font-medium capitalize">
-                        <?= htmlspecialchars($role ?? '') ?>
+                    <p class="text-slate-900 dark:text-white font-medium">
+                        <?= htmlspecialchars($displayRoleLabel) ?>
                     </p>
                 </div>
             </div>

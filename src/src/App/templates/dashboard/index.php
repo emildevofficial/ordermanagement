@@ -644,7 +644,7 @@ foreach (($lowStockProducts ?? []) as $product) {
 <div class='w-full xl:w-[calc(50%-0.5rem)] bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 overflow-hidden'>
 
     <!-- Card Header -->
-    <div class='flex items-start justify-between px-4 py-1.5 border-b border-slate-100 dark:border-slate-700'>
+    <div class='flex items-start p-5 justify-between border-b border-slate-100 dark:border-slate-700'>
         <div>
             <p class='text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest'>
                 Inventory Alerts
@@ -723,7 +723,7 @@ foreach (($lowStockProducts ?? []) as $product) {
 
         <div class="pt-6 text-center">
             <p class="text-sm font-semibold leading-6 text-slate-900 dark:text-slate-100">
-                Please enter the number of units you want to buy
+                Please enter the number of units you want to restock
             </p>
             <p id="dashboardBuyProductName" class="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400"></p>
 
@@ -741,7 +741,7 @@ foreach (($lowStockProducts ?? []) as $product) {
                         Cancel
                     </button>
                     <button type="submit" id="dashboardBuySubmit" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition">
-                        Buy
+                        Restock
                     </button>
                 </div>
             </form>

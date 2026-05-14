@@ -4,6 +4,8 @@ namespace App\Handler\Product;
 
 use App\Database\Database;
 use App\Helper\DateTimeHelper;
+use App\Helper\Permission;
+use App\Helper\Session;
 use App\Helper\Template;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
@@ -24,8 +26,15 @@ class ProductCreateHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        Session::start();
+
+        $deny = Permission::requireRole('admin');
+        if ($deny !== null) {
+            return $deny;
+        }
+
         $pdo = $this->db->getPdo();
-        $this->ensureProductTimestampColumns($pdo);
+        $this->ensureProductColumns($pdo);
 
         if ($request->getMethod() === 'POST') {
             $data = $request->getParsedBody();
@@ -33,6 +42,7 @@ class ProductCreateHandler implements RequestHandlerInterface
             $name = trim($data['name'] ?? '');
             $price = (float)($data['price'] ?? 0);
             $stock = (int)($data['stock'] ?? 0);
+            $imageUrl = trim((string)($data['image_url'] ?? ''));
 
             if (!$name || $price <= 0) {
         return new HtmlResponse($this->template->render('layout', [
@@ -43,8 +53,8 @@ class ProductCreateHandler implements RequestHandlerInterface
             }
 
             $stmt = $pdo->prepare("
-                INSERT INTO products (name, price, stock, is_active, created_at, updated_at)
-                VALUES (:name, :price, :stock, 1, :created_at, :updated_at)
+                INSERT INTO products (name, price, stock, image_url, is_active, created_at, updated_at)
+                VALUES (:name, :price, :stock, :image_url, 1, :created_at, :updated_at)
             ");
 
             $now = DateTimeHelper::nowForStorage();
@@ -52,6 +62,7 @@ class ProductCreateHandler implements RequestHandlerInterface
                 'name' => $name,
                 'price' => $price,
                 'stock' => $stock,
+                'image_url' => $imageUrl !== '' ? $imageUrl : null,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -64,12 +75,19 @@ class ProductCreateHandler implements RequestHandlerInterface
         ]));
     }
 
-    private function ensureProductTimestampColumns(\PDO $pdo): void
+    private function ensureProductColumns(\PDO $pdo): void
     {
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM products LIKE 'updated_at'");
-        $stmt->execute();
-        if (!$stmt->fetch()) {
-            $pdo->exec("ALTER TABLE products ADD COLUMN updated_at DATETIME NULL");
+        $columns = [
+            'updated_at' => "ALTER TABLE products ADD COLUMN updated_at DATETIME NULL",
+            'image_url' => "ALTER TABLE products ADD COLUMN image_url VARCHAR(500) NULL",
+        ];
+
+        foreach ($columns as $column => $sql) {
+            $stmt = $pdo->prepare("SHOW COLUMNS FROM products LIKE :column");
+            $stmt->execute([':column' => $column]);
+            if (!$stmt->fetch()) {
+                $pdo->exec($sql);
+            }
         }
     }
 }

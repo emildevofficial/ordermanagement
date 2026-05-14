@@ -103,7 +103,23 @@ class OrderUpdateHandler implements RequestHandlerInterface
         $pdo->beginTransaction();
 
         try {
-            $stmt = $pdo->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = :id");
+            if (Permission::isAllowed('admin')) {
+                $stmt = $pdo->prepare("SELECT id FROM orders WHERE id = :id FOR UPDATE");
+                $stmt->execute([':id' => $id]);
+            } else {
+                $stmt = $pdo->prepare("SELECT id FROM orders WHERE id = :id AND user_id = :user_id FOR UPDATE");
+                $stmt->execute([
+                    ':id' => $id,
+                    ':user_id' => $userId,
+                ]);
+            }
+
+            if (!$stmt->fetch()) {
+                $pdo->rollBack();
+                return new RedirectResponse('/orders');
+            }
+
+            $stmt = $pdo->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = :id FOR UPDATE");
             $stmt->execute([':id' => $id]);
             $oldItems = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -115,11 +131,11 @@ class OrderUpdateHandler implements RequestHandlerInterface
                 $stmt->execute([':qty' => $oldQuantity, ':pid' => $oldProductId]);
             }
 
-            $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = :id");
+            $stmt = $pdo->prepare("SELECT price, stock FROM products WHERE id = :id FOR UPDATE");
             $stmt->execute([':id' => $productId]);
-            $stock = $stmt->fetchColumn();
+            $product = $stmt->fetch();
 
-            if ($quantity > (int)$stock) {
+            if (!$product || $quantity > (int)$product['stock']) {
                 $pdo->rollBack();
                 return new RedirectResponse('/orders/' . $id . '/edit?error=no_stock');
             }
@@ -139,6 +155,7 @@ class OrderUpdateHandler implements RequestHandlerInterface
             $stmt->execute([':qty' => $quantity, ':pid' => $productId]);
 
             $updatedAt = DateTimeHelper::nowForStorage();
+            $total = round($quantity * (float)$product['price'], 2);
 
             if (Permission::isAllowed('admin')) {
                 $stmt = $pdo->prepare("
@@ -149,7 +166,7 @@ class OrderUpdateHandler implements RequestHandlerInterface
                 $stmt->execute([
                     ':status' => $status,
                     ':notes' => $notes,
-                    ':total' => ($quantity * 10),
+                    ':total' => $total,
                     ':updated_at' => $updatedAt,
                     ':id' => $id,
                 ]);
@@ -162,7 +179,7 @@ class OrderUpdateHandler implements RequestHandlerInterface
                 $stmt->execute([
                     ':status' => $status,
                     ':notes' => $notes,
-                    ':total' => ($quantity * 10),
+                    ':total' => $total,
                     ':updated_at' => $updatedAt,
                     ':id' => $id,
                     ':user_id' => $userId,
@@ -170,7 +187,7 @@ class OrderUpdateHandler implements RequestHandlerInterface
             }
 
             $pdo->commit();
-        } catch (PDOException $e) {
+        } catch (\Throwable $e) {
             $pdo->rollBack();
             return new RedirectResponse('/orders/' . $id . '/edit?error=update_failed');
         }
