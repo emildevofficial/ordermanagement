@@ -49,7 +49,7 @@ class ProfileHandler implements RequestHandlerInterface
 
         $content = "
     <div class='py-2'>
-        <div class='max-w-4xl mx-auto'>
+        <div class='max-w-4xl'>
             <div class='mb-8'>
                 <h1 class='text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight'>Profile</h1>
                 <p class='text-slate-500 dark:text-slate-400 mt-1 text-sm'>Manage your account settings and preferences.</p>

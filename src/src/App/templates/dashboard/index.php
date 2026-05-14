@@ -522,36 +522,47 @@ foreach (($lowStockProducts ?? []) as $product) {
 
 ?>
 <style>
-    .inv-alert-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 5px 12px;
-        border-radius: 8px;
-        background: #fafafa;
-        border: 1px solid #f1f5f9;
-        transition: all 0.15s;
+    .inv-alert-table {
+        width: 100%;
+        border-collapse: collapse;
     }
-    .inv-alert-row:hover {
-        background: #f8fafc;
-        border-color: #e2e8f0;
+
+    .inv-alert-table th {
+        padding: 8px 12px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-align: left;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
     }
-    .dark .inv-alert-row {
-        background: rgba(15, 23, 42, 0.4);
-        border-color: rgba(51, 65, 85, 0.5);
-    }
-    .dark .inv-alert-row:hover {
-        background: rgba(15, 23, 42, 0.6);
+
+    .dark .inv-alert-table th {
+        color: #94a3b8;
         border-color: rgba(51, 65, 85, 0.7);
     }
 
-    .inv-alert-content {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex: 1;
-        min-width: 0;
+    .inv-alert-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .dark .inv-alert-table td {
+        border-color: rgba(51, 65, 85, 0.45);
+    }
+
+    .inv-alert-row {
+        transition: background 0.15s;
+    }
+
+    .inv-alert-row:hover {
+        background: #f8fafc;
+    }
+
+    .dark .inv-alert-row:hover {
+        background: rgba(15, 23, 42, 0.55);
     }
 
     .inv-alert-name {
@@ -568,11 +579,16 @@ foreach (($lowStockProducts ?? []) as $product) {
         color: #e2e8f0;
     }
 
-    .inv-alert-action-group {
+    .inv-alert-stock-cell,
+    .inv-alert-action-cell {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        flex-shrink: 0;
+    }
+
+    .inv-alert-action-cell {
+        justify-content: flex-end;
+        width: 100%;
     }
 
     .inv-stock-indicator {
@@ -592,7 +608,7 @@ foreach (($lowStockProducts ?? []) as $product) {
     }
 
     .inv-stock-qty {
-        min-width: 28px;
+        min-width: 26px;
         padding: 2px 7px;
         border-radius: 6px;
         background: #f1f5f9;
@@ -600,7 +616,7 @@ foreach (($lowStockProducts ?? []) as $product) {
         font-size: 12px;
         font-weight: 700;
         line-height: 18px;
-        text-align: center;
+        text-align: right;
         font-variant-numeric: tabular-nums;
     }
 
@@ -702,30 +718,47 @@ foreach (($lowStockProducts ?? []) as $product) {
 
     <?php else: ?>
 
-        <div class='px-4 py-1.5 space-y-1' data-inventory-alert-list>
-            <?php foreach ($lowStockProducts as $product):
-                $stock = (int)($product['stock'] ?? 0);
-                $productId = (int)($product['id'] ?? 0);
-                $productName = (string)($product['name'] ?? 'Unknown Product');
-            ?>
-            <div class='inv-alert-row' data-alert-row data-product-id='<?= $productId ?>' data-stock='<?= $stock ?>'>
-                <div class='inv-alert-content'>
-                    <span class='inv-alert-name'>
-                        <?= htmlspecialchars($productName) ?>
-                    </span>
-                </div>
-                <div class='inv-alert-action-group'>
-                    <span class='inv-stock-qty' data-alert-stock-qty data-product-id='<?= $productId ?>' aria-label='Current stock quantity'>Stock: <?= $stock ?></span>
-                    <span class='inv-stock-indicator <?= $stock === 0 ? 'is-alert' : 'is-warning' ?>' aria-hidden='true'></span>
-                    <button type='button' class='inv-action-btn restock-alert-btn dashboard-restock-trigger' data-product-id='<?= $productId ?>' data-product-name='<?= htmlspecialchars($productName, ENT_QUOTES) ?>'>
-                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='currentColor' style='width:12px;height:12px;flex-shrink:0'>
-                            <path d='M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.263a1.75 1.75 0 0 0 0-2.474ZM4.75 14.25a.75.75 0 0 0 0-1.5H3.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5h5.25a.75.75 0 0 0 0-1.5H3.5A2 2 0 0 0 1.5 4v8.25a2 2 0 0 0 2 2h1.25Z'/>
-                        </svg>
-                        Restock
-                    </button>
-                </div>
-            </div>
-            <?php endforeach; ?>
+        <div class='px-4 py-2' data-inventory-alert-list>
+            <table class='inv-alert-table'>
+                <thead>
+                    <tr>
+                        <th scope='col'>Product Title</th>
+                        <th scope='col'>Stock</th>
+                        <th scope='col' class='text-right'></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($lowStockProducts as $product):
+                        $stock = (int)($product['stock'] ?? 0);
+                        $productId = (int)($product['id'] ?? 0);
+                        $productName = (string)($product['name'] ?? 'Unknown Product');
+                    ?>
+                    <tr class='inv-alert-row' data-alert-row data-product-id='<?= $productId ?>' data-stock='<?= $stock ?>'>
+                        <td>
+                            <span class='inv-alert-name'>
+                                <?= htmlspecialchars($productName) ?>
+                            </span>
+                        </td>
+                        <td>
+                            <span class='inv-alert-stock-cell'>
+                                <span class='inv-stock-qty' data-alert-stock-qty data-product-id='<?= $productId ?>' aria-label='Current stock quantity'><?= $stock ?></span>
+                                <span class='inv-stock-indicator <?= $stock === 0 ? 'is-alert' : 'is-warning' ?>' aria-hidden='true'></span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class='inv-alert-action-cell'>
+                                <button type='button' class='inv-action-btn restock-alert-btn dashboard-restock-trigger' data-product-id='<?= $productId ?>' data-product-name='<?= htmlspecialchars($productName, ENT_QUOTES) ?>'>
+                                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='currentColor' style='width:12px;height:12px;flex-shrink:0'>
+                                        <path d='M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.263a1.75 1.75 0 0 0 0-2.474ZM4.75 14.25a.75.75 0 0 0 0-1.5H3.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5h5.25a.75.75 0 0 0 0-1.5H3.5A2 2 0 0 0 1.5 4v8.25a2 2 0 0 0 2 2h1.25Z'/>
+                                    </svg>
+                                    Restock
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
 
     <?php endif; ?>
@@ -749,8 +782,12 @@ foreach (($lowStockProducts ?? []) as $product) {
             <form id="dashboardBuyForm" class="mt-5 space-y-4" data-product-id="">
                 <input id="dashboardBuyProductId" name="product_id" type="hidden" value="">
                 <div class="flex flex-col items-center gap-2">
-                    <label for="dashboardBuyQuantity" class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Units to add</label>
-                    <input id="dashboardBuyQuantity" name="quantity" type="number" min="1" step="1" required class="h-11 w-32 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-center text-base font-semibold text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                    <label for="dashboardBuyQuantity" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Units to add</label>
+                    <div class="inline-flex items-center overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm dark:border-slate-600 dark:bg-slate-900">
+                        <button type="button" data-quantity-step="-1" class="inline-flex h-9 w-9 items-center justify-center border-r border-slate-200 text-base font-semibold leading-none text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Decrease units">-</button>
+                        <input id="dashboardBuyQuantity" name="quantity" type="number" min="1" step="1" required placeholder="1" class="h-9 w-16 border-0 bg-transparent px-2 text-center text-sm font-semibold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-0 dark:text-slate-100 dark:placeholder:text-slate-600">
+                        <button type="button" data-quantity-step="1" class="inline-flex h-9 w-9 items-center justify-center border-l border-slate-200 text-base font-semibold leading-none text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Increase units">+</button>
+                    </div>
                 </div>
 
                 <p id="dashboardBuyMessage" class="hidden text-sm font-medium"></p>
@@ -863,12 +900,24 @@ function initDashboardRestockModal() {
         });
     }
 
+    document.querySelectorAll('[data-quantity-step]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            if (!quantityInput) return;
+
+            const step = parseInt(button.dataset.quantityStep || '0', 10);
+            const current = parseInt(quantityInput.value || '1', 10);
+            const nextValue = Math.max(1, (Number.isInteger(current) ? current : 1) + step);
+            quantityInput.value = String(nextValue);
+            quantityInput.focus();
+        });
+    });
+
     function updateProductStockInDom(productId, newStock) {
         document.querySelectorAll('[data-product-stock][data-product-id="' + productId + '"]').forEach(function (stockNode) {
             stockNode.textContent = String(newStock);
         });
         document.querySelectorAll('[data-alert-stock-qty][data-product-id="' + productId + '"]').forEach(function (stockNode) {
-            stockNode.textContent = 'Stock: ' + String(newStock);
+            stockNode.textContent = String(newStock);
         });
     }
 

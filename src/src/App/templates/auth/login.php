@@ -7,18 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-        input:focus { outline: none; border-color: #16a34a !important; box-shadow: 0 0 0 3px rgba(34,197,94,0.08); }
+        input:focus { outline: none; border-color: #4f46e5 !important; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gray-100">
 
 <?php $tab = $_GET['tab'] ?? 'login'; ?>
 
-<!-- MAIN CARD: contains both the green strip and the form as one element -->
+<!-- MAIN CARD: contains both the brand strip and the form as one element -->
 <div class="bg-white rounded-2xl shadow-xl flex overflow-hidden items-stretch">
 
-    <!-- GREEN STRIP (left) - thin, attached to the same card -->
-    <div class="bg-green-600 w-12 flex items-center justify-center">
+    <!-- BRAND STRIP (left) - thin, attached to the same card -->
+    <div class="bg-indigo-600 w-12 flex items-center justify-center">
         <span class="text-white text-sm font-semibold -rotate-90 leading-none">OrderManagement</span>
     </div>
 
@@ -59,11 +59,11 @@
                     <input id="confirm" name="confirm" type="password" required placeholder="Repeat your password" class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm">
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-base">Create account</button>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-base transition">Create account</button>
             </form>
 
             <div class="mt-4 text-sm text-gray-600">
-                Already have an account? <a href="/login" class="text-green-600 font-medium hover:text-green-700">Sign in</a>
+                Already have an account? <a href="/login" class="text-indigo-600 font-medium hover:text-indigo-700">Sign in</a>
             </div>
 
         <?php else: ?>
@@ -90,11 +90,11 @@
                     <input id="password" name="password" type="password" required placeholder="Your password" class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm">
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-base">Sign in</button>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-base transition">Sign in</button>
             </form>
 
             <div class="mt-4 text-sm text-gray-600">
-                Don't have an account? <a href="/login?tab=register" class="text-green-600 font-medium hover:text-green-700">Create account</a>
+                Don't have an account? <a href="/login?tab=register" class="text-indigo-600 font-medium hover:text-indigo-700">Create account</a>
             </div>
 
         <?php endif; ?>
