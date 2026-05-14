@@ -17,7 +17,7 @@ use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use function max;
+
 use function round;
 
 final class AnalyticsHandler implements RequestHandlerInterface
@@ -32,34 +32,34 @@ final class AnalyticsHandler implements RequestHandlerInterface
     {
         Session::start();
 
-        $pdo = $this->db->getPdo();
-        $summary = $this->fetchSummary($pdo);
-        $dailyTrend = $this->fetchDailyTrend($pdo);
-        $monthlyTrend = $this->fetchMonthlyTrend($pdo);
-        $orderStatus = $this->fetchOrderStatusBreakdown($pdo);
-        $productAnalytics = $this->fetchProductAnalytics($pdo);
-        $customerAnalytics = $this->fetchCustomerAnalytics($pdo);
-        $returnAnalytics = $this->fetchReturnAnalytics($pdo);
+        $pdo                   = $this->db->getPdo();
+        $summary               = $this->fetchSummary($pdo);
+        $dailyTrend            = $this->fetchDailyTrend($pdo);
+        $monthlyTrend          = $this->fetchMonthlyTrend($pdo);
+        $orderStatus           = $this->fetchOrderStatusBreakdown($pdo);
+        $productAnalytics      = $this->fetchProductAnalytics($pdo);
+        $customerAnalytics     = $this->fetchCustomerAnalytics($pdo);
+        $returnAnalytics       = $this->fetchReturnAnalytics($pdo);
         $recentHighValueOrders = $this->fetchRecentHighValueOrders($pdo);
 
         $content = Template::render('analytics/index', [
-            'summary' => $summary,
-            'dailyTrend' => $dailyTrend,
-            'monthlyTrend' => $monthlyTrend,
-            'orderStatus' => $orderStatus,
-            'productAnalytics' => $productAnalytics,
-            'customerAnalytics' => $customerAnalytics,
-            'returnAnalytics' => $returnAnalytics,
+            'summary'               => $summary,
+            'dailyTrend'            => $dailyTrend,
+            'monthlyTrend'          => $monthlyTrend,
+            'orderStatus'           => $orderStatus,
+            'productAnalytics'      => $productAnalytics,
+            'customerAnalytics'     => $customerAnalytics,
+            'returnAnalytics'       => $returnAnalytics,
             'recentHighValueOrders' => $recentHighValueOrders,
-            'lowStockThreshold' => self::LOW_STOCK_THRESHOLD,
+            'lowStockThreshold'     => self::LOW_STOCK_THRESHOLD,
         ]);
 
         return new HtmlResponse(
             Template::render('layout', [
-                'content' => $content,
+                'content'      => $content,
                 'currentRoute' => 'analytics',
-                'userName' => Session::get('user_name'),
-                'role' => Session::get('user_role'),
+                'userName'     => Session::get('user_name'),
+                'role'         => Session::get('user_role'),
             ])
         );
     }
@@ -83,8 +83,8 @@ final class AnalyticsHandler implements RequestHandlerInterface
         $stmt->execute();
         $orders = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $totalOrders = (int)($orders['total_orders'] ?? 0);
-        $totalReturns = (int)$pdo->query("SELECT COUNT(*) FROM returns")->fetchColumn();
+        $totalOrders  = (int) ($orders['total_orders'] ?? 0);
+        $totalReturns = (int) $pdo->query("SELECT COUNT(*) FROM returns")->fetchColumn();
 
         $stmt = $pdo->prepare("
             SELECT
@@ -104,21 +104,29 @@ final class AnalyticsHandler implements RequestHandlerInterface
         ");
         $stmt->execute([':start' => $monthStart, ':end' => $monthEnd]);
 
+        $completedOrders    = (int) ($orders['completed_orders'] ?? 0);
+        $cancelledOrders    = (int) ($orders['cancelled_orders'] ?? 0);
+        $lowStockProducts   = (int) ($products['low_stock_products'] ?? 0);
+        $outOfStockProducts = (int) ($products['out_of_stock_products'] ?? 0);
+        $completionRate     = $totalOrders > 0 ? round(($completedOrders / $totalOrders) * 100, 1) : 0.0;
+        $cancellationRate   = $totalOrders > 0 ? round(($cancelledOrders / $totalOrders) * 100, 1) : 0.0;
+        $inventoryRiskCount = $lowStockProducts + $outOfStockProducts;
+
         return [
-            'revenue' => (float)($orders['revenue'] ?? 0),
-            'total_orders' => $totalOrders,
-            'average_order_value' => (float)($orders['average_order_value'] ?? 0),
-            'total_returns' => $totalReturns,
-            'return_rate' => $totalOrders > 0 ? round(($totalReturns / $totalOrders) * 100, 1) : 0.0,
-            'completed_orders' => (int)($orders['completed_orders'] ?? 0),
-            'cancelled_orders' => (int)($orders['cancelled_orders'] ?? 0),
-            'completion_rate' => $totalOrders > 0 ? round(((int)($orders['completed_orders'] ?? 0) / $totalOrders) * 100, 1) : 0.0,
-            'cancellation_rate' => $totalOrders > 0 ? round(((int)($orders['cancelled_orders'] ?? 0) / $totalOrders) * 100, 1) : 0.0,
-            'active_products' => (int)($products['active_products'] ?? 0),
-            'low_stock_products' => (int)($products['low_stock_products'] ?? 0),
-            'out_of_stock_products' => (int)($products['out_of_stock_products'] ?? 0),
-            'inventory_risk_count' => (int)($products['low_stock_products'] ?? 0) + (int)($products['out_of_stock_products'] ?? 0),
-            'new_customers_this_month' => (int)$stmt->fetchColumn(),
+            'revenue'                  => (float) ($orders['revenue'] ?? 0),
+            'total_orders'             => $totalOrders,
+            'average_order_value'      => (float) ($orders['average_order_value'] ?? 0),
+            'total_returns'            => $totalReturns,
+            'return_rate'              => $totalOrders > 0 ? round(($totalReturns / $totalOrders) * 100, 1) : 0.0,
+            'completed_orders'         => $completedOrders,
+            'cancelled_orders'         => $cancelledOrders,
+            'completion_rate'          => $completionRate,
+            'cancellation_rate'        => $cancellationRate,
+            'active_products'          => (int) ($products['active_products'] ?? 0),
+            'low_stock_products'       => $lowStockProducts,
+            'out_of_stock_products'    => $outOfStockProducts,
+            'inventory_risk_count'     => $inventoryRiskCount,
+            'new_customers_this_month' => (int) $stmt->fetchColumn(),
         ];
     }
 
@@ -127,13 +135,13 @@ final class AnalyticsHandler implements RequestHandlerInterface
      */
     private function fetchDailyTrend(PDO $pdo): array
     {
-        $timezone = new DateTimeZone(DateTimeHelper::APP_TIMEZONE);
+        $timezone        = new DateTimeZone(DateTimeHelper::APP_TIMEZONE);
         $storageTimezone = new DateTimeZone('UTC');
-        $today = new DateTimeImmutable('today', $timezone);
-        $startLocal = $today->modify('-6 days');
-        $endLocal = $today->modify('+1 day');
-        $start = $startLocal->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
-        $end = $endLocal->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
+        $today           = new DateTimeImmutable('today', $timezone);
+        $startLocal      = $today->modify('-6 days');
+        $endLocal        = $today->modify('+1 day');
+        $start           = $startLocal->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
+        $end             = $endLocal->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
 
         $stmt = $pdo->prepare("
             SELECT
@@ -149,18 +157,18 @@ final class AnalyticsHandler implements RequestHandlerInterface
 
         $rowsByDay = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $rowsByDay[(string)$row['day_key']] = $row;
+            $rowsByDay[(string) $row['day_key']] = $row;
         }
 
-        $trend = [];
+        $trend  = [];
         $period = new DatePeriod($startLocal, new DateInterval('P1D'), $endLocal);
         foreach ($period as $day) {
-            $key = $day->setTimezone($storageTimezone)->format('Y-m-d');
-            $row = $rowsByDay[$key] ?? null;
+            $key     = $day->setTimezone($storageTimezone)->format('Y-m-d');
+            $row     = $rowsByDay[$key] ?? null;
             $trend[] = [
-                'label' => $day->format('D'),
-                'orders' => (int)($row['orders'] ?? 0),
-                'revenue' => (float)($row['revenue'] ?? 0),
+                'label'   => $day->format('D'),
+                'orders'  => (int) ($row['orders'] ?? 0),
+                'revenue' => (float) ($row['revenue'] ?? 0),
             ];
         }
 
@@ -172,12 +180,14 @@ final class AnalyticsHandler implements RequestHandlerInterface
      */
     private function fetchMonthlyTrend(PDO $pdo): array
     {
-        $timezone = new DateTimeZone(DateTimeHelper::APP_TIMEZONE);
+        $timezone        = new DateTimeZone(DateTimeHelper::APP_TIMEZONE);
         $storageTimezone = new DateTimeZone('UTC');
-        $firstMonth = (new DateTimeImmutable('first day of this month', $timezone))->setTime(0, 0)->modify('-5 months');
-        $endLocal = (new DateTimeImmutable('first day of next month', $timezone))->setTime(0, 0);
-        $start = $firstMonth->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
-        $end = $endLocal->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
+        $firstMonth      = (new DateTimeImmutable('first day of this month', $timezone))
+            ->setTime(0, 0)
+            ->modify('-5 months');
+        $endLocal        = (new DateTimeImmutable('first day of next month', $timezone))->setTime(0, 0);
+        $start           = $firstMonth->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
+        $end             = $endLocal->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
 
         $stmt = $pdo->prepare("
             SELECT
@@ -192,17 +202,17 @@ final class AnalyticsHandler implements RequestHandlerInterface
 
         $rowsByMonth = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $rowsByMonth[(string)$row['month_key']] = $row;
+            $rowsByMonth[(string) $row['month_key']] = $row;
         }
 
-        $trend = [];
+        $trend  = [];
         $period = new DatePeriod($firstMonth, new DateInterval('P1M'), $endLocal);
         foreach ($period as $month) {
-            $key = $month->format('Y-m');
-            $row = $rowsByMonth[$key] ?? null;
+            $key     = $month->format('Y-m');
+            $row     = $rowsByMonth[$key] ?? null;
             $trend[] = [
-                'label' => $month->format('M'),
-                'revenue' => (float)($row['revenue'] ?? 0),
+                'label'   => $month->format('M'),
+                'revenue' => (float) ($row['revenue'] ?? 0),
             ];
         }
 
@@ -223,15 +233,15 @@ final class AnalyticsHandler implements RequestHandlerInterface
 
         $total = 0;
         foreach ($rows as $row) {
-            $total += (int)$row['order_count'];
+            $total += (int) $row['order_count'];
         }
 
         $statusRows = [];
         foreach ($rows as $row) {
-            $count = (int)$row['order_count'];
+            $count        = (int) $row['order_count'];
             $statusRows[] = [
-                'status' => (string)$row['status'],
-                'count' => $count,
+                'status'     => (string) $row['status'],
+                'count'      => $count,
                 'percentage' => $total > 0 ? round(($count / $total) * 100, 1) : 0.0,
             ];
         }
@@ -290,9 +300,9 @@ final class AnalyticsHandler implements RequestHandlerInterface
         $stmt->execute([':threshold' => self::LOW_STOCK_THRESHOLD]);
 
         return [
-            'topSelling' => $topSelling,
-            'topRevenue' => $topRevenue,
-            'slowMoving' => $slowMoving,
+            'topSelling'    => $topSelling,
+            'topRevenue'    => $topRevenue,
+            'slowMoving'    => $slowMoving,
             'inventoryRisk' => $stmt->fetchAll(PDO::FETCH_ASSOC),
         ];
     }
@@ -334,7 +344,7 @@ final class AnalyticsHandler implements RequestHandlerInterface
             WHERE created_at >= :start AND created_at < :end
         ");
         $stmt->execute([':start' => $monthStart, ':end' => $monthEnd]);
-        $newCustomersThisMonth = (int)$stmt->fetchColumn();
+        $newCustomersThisMonth = (int) $stmt->fetchColumn();
 
         $customersWithReturns = $pdo->query("
             SELECT COALESCE(c.name, u.name, 'Unknown Customer') AS customer_name,
@@ -348,15 +358,20 @@ final class AnalyticsHandler implements RequestHandlerInterface
         ")->fetchAll(PDO::FETCH_ASSOC);
 
         return [
-            'topSpenders' => $topSpenders,
-            'topOrderCounts' => $topOrderCounts,
+            'topSpenders'           => $topSpenders,
+            'topOrderCounts'        => $topOrderCounts,
             'newCustomersThisMonth' => $newCustomersThisMonth,
-            'customersWithReturns' => $customersWithReturns,
+            'customersWithReturns'  => $customersWithReturns,
         ];
     }
 
     /**
-     * @return array{statusRows: list<array{status: string, count: int, percentage: float}>, mostReturnedProducts: list<array<string, int|string|null>>, pendingReturns: list<array<string, int|string|null>>, total: int}
+     * @return array{
+     *     statusRows: list<array{status: string, count: int, percentage: float}>,
+     *     mostReturnedProducts: list<array<string, int|string|null>>,
+     *     pendingReturns: list<array<string, int|string|null>>,
+     *     total: int
+     * }
      */
     private function fetchReturnAnalytics(PDO $pdo): array
     {
@@ -369,15 +384,15 @@ final class AnalyticsHandler implements RequestHandlerInterface
 
         $total = 0;
         foreach ($rows as $row) {
-            $total += (int)$row['return_count'];
+            $total += (int) $row['return_count'];
         }
 
         $statusRows = [];
         foreach ($rows as $row) {
-            $count = (int)$row['return_count'];
+            $count        = (int) $row['return_count'];
             $statusRows[] = [
-                'status' => (string)$row['status'],
-                'count' => $count,
+                'status'     => (string) $row['status'],
+                'count'      => $count,
                 'percentage' => $total > 0 ? round(($count / $total) * 100, 1) : 0.0,
             ];
         }
@@ -403,10 +418,10 @@ final class AnalyticsHandler implements RequestHandlerInterface
         ")->fetchAll(PDO::FETCH_ASSOC);
 
         return [
-            'statusRows' => $statusRows,
+            'statusRows'           => $statusRows,
             'mostReturnedProducts' => $mostReturnedProducts,
-            'pendingReturns' => $pendingReturns,
-            'total' => $total,
+            'pendingReturns'       => $pendingReturns,
+            'total'                => $total,
         ];
     }
 

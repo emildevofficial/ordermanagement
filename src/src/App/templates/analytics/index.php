@@ -140,9 +140,8 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Analytics</h2>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Business health across orders, inventory, customers, and returns.</p>
+                <!-- <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Business health across orders, inventory, customers, and returns.</p> -->
             </div>
-            <span class="inline-flex w-fit items-center rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">Refreshes on page load</span>
         </div>
     </div>
 
