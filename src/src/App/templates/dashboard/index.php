@@ -715,8 +715,8 @@ foreach (($lowStockProducts ?? []) as $product) {
                     </span>
                 </div>
                 <div class='inv-alert-action-group'>
+                    <span class='inv-stock-qty' data-alert-stock-qty data-product-id='<?= $productId ?>' aria-label='Current stock quantity'>Stock: <?= $stock ?></span>
                     <span class='inv-stock-indicator <?= $stock === 0 ? 'is-alert' : 'is-warning' ?>' aria-hidden='true'></span>
-                    <span class='inv-stock-qty' data-alert-stock-qty data-product-id='<?= $productId ?>' aria-label='Current stock quantity'><?= $stock ?></span>
                     <button type='button' class='inv-action-btn restock-alert-btn dashboard-restock-trigger' data-product-id='<?= $productId ?>' data-product-name='<?= htmlspecialchars($productName, ENT_QUOTES) ?>'>
                         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='currentColor' style='width:12px;height:12px;flex-shrink:0'>
                             <path d='M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.263a1.75 1.75 0 0 0 0-2.474ZM4.75 14.25a.75.75 0 0 0 0-1.5H3.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5h5.25a.75.75 0 0 0 0-1.5H3.5A2 2 0 0 0 1.5 4v8.25a2 2 0 0 0 2 2h1.25Z'/>
@@ -868,7 +868,7 @@ function initDashboardRestockModal() {
             stockNode.textContent = String(newStock);
         });
         document.querySelectorAll('[data-alert-stock-qty][data-product-id="' + productId + '"]').forEach(function (stockNode) {
-            stockNode.textContent = String(newStock);
+            stockNode.textContent = 'Stock: ' + String(newStock);
         });
     }
 
