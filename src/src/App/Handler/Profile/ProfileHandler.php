@@ -46,6 +46,16 @@ class ProfileHandler implements RequestHandlerInterface
         $backLabel = $userRole === 'admin' ? 'Back to Dashboard' : 'Back to Shop';
         $backHref = htmlspecialchars($backHref, ENT_QUOTES, 'UTF-8');
         $backLabel = htmlspecialchars($backLabel, ENT_QUOTES, 'UTF-8');
+        $profileSuccess = Session::getFlash('profile_success');
+        $profileSuccessHtml = '';
+
+        if ($profileSuccess !== null) {
+            $safeProfileSuccess = htmlspecialchars((string) $profileSuccess, ENT_QUOTES, 'UTF-8');
+            $profileSuccessHtml = "
+            <div class='mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'>
+                {$safeProfileSuccess}
+            </div>";
+        }
 
         $content = "
     <div class='py-2'>
@@ -54,6 +64,7 @@ class ProfileHandler implements RequestHandlerInterface
                 <h1 class='text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight'>Profile</h1>
                 <p class='text-slate-500 dark:text-slate-400 mt-1 text-sm'>Manage your account settings and preferences.</p>
             </div>
+            {$profileSuccessHtml}
 
             <div class='bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 dark:text-slate-100 overflow-hidden'>
                 <div class='px-6 py-6 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center gap-5'>

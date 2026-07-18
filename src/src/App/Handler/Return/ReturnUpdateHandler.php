@@ -78,6 +78,21 @@ class ReturnUpdateHandler implements RequestHandlerInterface
             $newStatus = $requestedStatus;
             $previousStatus = (string)$return['status'];
 
+            if ($previousStatus !== 'pending') {
+                $pdo->rollBack();
+                if ($wantsJson) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'error' => 'Return decision has already been made',
+                        'status' => $previousStatus,
+                    ], 409);
+                }
+
+                return $redirectTo === '/returns'
+                    ? new RedirectResponse('/returns')
+                    : new RedirectResponse('/returns/' . $id);
+            }
+
             if ($previousStatus === $newStatus) {
                 $pdo->commit();
                 if ($wantsJson) {

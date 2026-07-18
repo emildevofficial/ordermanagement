@@ -4,12 +4,11 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Orders · Admin</title>
-    <meta name='color-scheme' content='light dark'>
+    <meta name='color-scheme' content='light'>
     <script>
-        window.tailwind = window.tailwind || {};
-        window.tailwind.config = { darkMode: 'class' };
-
         (function () {
+            var darkBackground = '#0f172a';
+            var lightBackground = '#f8fafc';
             var theme = null;
 
             try {
@@ -27,8 +26,17 @@
             }
 
             var useDark = theme === 'dark' || (theme !== 'light' && prefersDark);
-            document.documentElement.classList.toggle('dark', useDark);
-            document.documentElement.style.backgroundColor = useDark ? '#0f172a' : '#f8fafc';
+            var root = document.documentElement;
+
+            root.classList.toggle('dark', useDark);
+            root.dataset.theme = useDark ? 'dark' : 'light';
+            root.style.backgroundColor = useDark ? darkBackground : lightBackground;
+            root.style.colorScheme = useDark ? 'dark' : 'light';
+
+            var colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+            if (colorSchemeMeta) {
+                colorSchemeMeta.setAttribute('content', useDark ? 'dark' : 'light');
+            }
         })();
     </script>
     <style>
@@ -37,7 +45,10 @@
         body { background: #f8fafc; }
         html.dark body { background: #0f172a; }
     </style>
-    <script src='https://cdn.tailwindcss.com'></script>
+    <script src='https://cdn.tailwindcss.com/3.4.16'></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         * { font-family: 'Inter', sans-serif; }
@@ -47,6 +58,41 @@
         .peer:checked ~ .profile-dropdown { display: block; }
     </style>
     <script>
+        const THEME_COLORS = {
+            dark: '#0f172a',
+            light: '#f8fafc'
+        };
+
+        function applyTheme(theme, persist = true) {
+            const useDark = theme === 'dark';
+            const root = document.documentElement;
+            const body = document.body;
+            const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+
+            root.classList.toggle('dark', useDark);
+            root.dataset.theme = useDark ? 'dark' : 'light';
+            root.style.backgroundColor = useDark ? THEME_COLORS.dark : THEME_COLORS.light;
+            root.style.colorScheme = useDark ? 'dark' : 'light';
+
+            if (body) {
+                body.classList.toggle('dark', useDark);
+                body.style.backgroundColor = useDark ? THEME_COLORS.dark : THEME_COLORS.light;
+            }
+
+            if (colorSchemeMeta) {
+                colorSchemeMeta.setAttribute('content', useDark ? 'dark' : 'light');
+            }
+
+            if (persist) {
+                try {
+                    localStorage.setItem('theme', useDark ? 'dark' : 'light');
+                } catch (e) {
+                }
+            }
+
+            syncThemeToggleState();
+        }
+
         function syncThemeToggleState() {
             const toggle = document.getElementById('darkToggle');
             if (!toggle) return;
@@ -58,14 +104,9 @@
             const toggle = document.getElementById('darkToggle');
             if (toggle) {
                 toggle.addEventListener('click', () => {
-                    document.documentElement.classList.toggle('dark');
-                    document.documentElement.style.backgroundColor = document.documentElement.classList.contains('dark') ? '#0f172a' : '#f8fafc';
-                    try {
-                        localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-                    } catch (e) {
-                    }
-                    syncThemeToggleState();
+                    applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
                 });
+                applyTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light', false);
                 syncThemeToggleState();
             }
             document.addEventListener('click', function(e) {
@@ -166,7 +207,7 @@
                     </div>
                 </a>
 
-                <a href='/orders' class='block w-full'>
+                <a href='/my-orders' class='block w-full'>
                     <div class='flex items-center gap-3 px-4 py-3 <?= ($currentRoute ?? '') === "orders" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700" ?> rounded-xl transition cursor-pointer'>
                         <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'/></svg>
                         <span class='flex-1'>My Orders</span>

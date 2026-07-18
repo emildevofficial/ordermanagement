@@ -119,6 +119,12 @@ $formatProductName = static function (string $name): string {
         <p class="text-sm text-slate-500 dark:text-slate-400">Browse available products and choose a quantity during checkout.</p>
     </div>
 
+    <?php if (!empty($purchaseError)): ?>
+        <div class="rounded-lg border border-red-800 bg-red-950/70 px-4 py-3 text-sm font-medium text-red-100">
+            <?= htmlspecialchars((string)$purchaseError) ?>
+        </div>
+    <?php endif; ?>
+
     <?php if (!empty($products)): ?>
         <div class="shop-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
             <?php foreach ($products as $product): ?>
@@ -217,7 +223,7 @@ $formatProductName = static function (string $name): string {
             </button>
         </div>
 
-        <form method="POST" action="/orders/create" class="mt-6 flex flex-col items-center gap-5">
+        <form method="POST" action="/shop/buy" class="mt-6 flex flex-col items-center gap-5">
             <input type="hidden" id="shopBuyProductId" name="product_id" value="">
             <div class="flex w-full flex-col items-center">
                 <label for="shopBuyQuantity" class="block text-center text-sm font-medium text-slate-200">How many units would you like to purchase?</label>

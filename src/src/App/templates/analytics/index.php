@@ -139,7 +139,7 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
         </nav>
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Analytics</h2>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Detailed Analytics</h2>
                 <!-- <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Business health across orders, inventory, customers, and returns.</p> -->
             </div>
         </div>
@@ -151,7 +151,7 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
             ['label' => 'Revenue', 'value' => $money($summary['revenue'] ?? 0), 'note' => 'Completed and delivered'],
             ['label' => 'Orders', 'value' => $number($summary['total_orders'] ?? 0), 'note' => 'All statuses'],
             ['label' => 'Avg Order Value', 'value' => $money($summary['average_order_value'] ?? 0), 'note' => 'Finalized orders'],
-            ['label' => 'Return Rate', 'value' => $percent($summary['return_rate'] ?? 0), 'note' => ($summary['total_returns'] ?? 0) . ' total returns'],
+            ['label' => 'Return Rate', 'value' => $percent($summary['return_rate'] ?? 0), 'note' => ($summary['total_returns'] ?? 0) . ' returns in total'],
             ['label' => 'Active Products', 'value' => $number($summary['active_products'] ?? 0), 'note' => 'Visible inventory'],
             ['label' => 'Stock Risk', 'value' => $number($summary['inventory_risk_count'] ?? 0), 'note' => 'Low or out of stock'],
         ];
@@ -170,8 +170,16 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Last 7 Days</h3>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Orders and finalized revenue by day.</p>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Orders and revenue by day.</p>
                 </div>
+                <label class="sr-only" for="dailyTrendMetric">Daily trend metric</label>
+                <select
+                    id="dailyTrendMetric"
+                    class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                >
+                    <option value="orders">Orders</option>
+                    <option value="revenue">Revenue</option>
+                </select>
             </div>
 
             <?php if ($dailyMaxRevenue <= 0 && $dailyMaxOrders <= 0): ?>
@@ -179,24 +187,37 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
             <?php else: ?>
                 <div class="grid h-72 grid-cols-7 items-end gap-3">
                     <?php foreach (($dailyTrend ?? []) as $day):
-                        $revenueHeight = $dailyMaxRevenue > 0 ? max(8, round(((float)$day['revenue'] / $dailyMaxRevenue) * 100, 1)) : 0;
-                        $ordersHeight = $dailyMaxOrders > 0 ? max(8, round(((int)$day['orders'] / $dailyMaxOrders) * 100, 1)) : 0;
+                        $dayRevenue = (float)($day['revenue'] ?? 0);
+                        $dayOrders = (int)($day['orders'] ?? 0);
+                        $revenueHeight = ($dailyMaxRevenue > 0 && $dayRevenue > 0) ? max(8, round(($dayRevenue / $dailyMaxRevenue) * 100, 1)) : 0;
+                        $ordersHeight = ($dailyMaxOrders > 0 && $dayOrders > 0) ? max(8, round(($dayOrders / $dailyMaxOrders) * 100, 1)) : 0;
                     ?>
                     <div class="flex h-full min-w-0 flex-col justify-end gap-2">
-                        <div class="flex flex-1 items-end justify-center gap-1.5">
-                            <div class="w-3 rounded-t bg-indigo-500" style="height: <?= $revenueHeight ?>%" title="Revenue <?= $money($day['revenue']) ?>"></div>
-                            <div class="w-3 rounded-t bg-emerald-500" style="height: <?= $ordersHeight ?>%" title="<?= (int)$day['orders'] ?> orders"></div>
+                        <div class="flex flex-1 items-end justify-center">
+                            <div
+                                class="hidden w-4 rounded-t bg-indigo-500"
+                                data-daily-trend-bar="revenue"
+                                style="height: <?= $revenueHeight ?>%"
+                                title="Revenue <?= $money($dayRevenue) ?>"
+                            ></div>
+                            <div
+                                class="w-4 rounded-t bg-emerald-500"
+                                data-daily-trend-bar="orders"
+                                style="height: <?= $ordersHeight ?>%"
+                                title="<?= $dayOrders ?> orders"
+                            ></div>
                         </div>
                         <div class="text-center">
                             <p class="truncate text-xs font-semibold text-slate-600 dark:text-slate-300"><?= $escape($day['label']) ?></p>
-                            <p class="text-[11px] text-slate-400 dark:text-slate-500"><?= (int)$day['orders'] ?> ord</p>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500" data-daily-trend-value="orders"><?= $dayOrders ?> ord</p>
+                            <p class="hidden text-[11px] text-indigo-500 dark:text-indigo-300" data-daily-trend-value="revenue"><?= $money($dayRevenue) ?></p>
                         </div>
                     </div>
                     <?php endforeach; ?>
                 </div>
                 <div class="mt-4 flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
-                    <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-indigo-500"></span>Revenue</span>
-                    <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Orders</span>
+                    <span class="hidden items-center gap-1.5" data-daily-trend-legend="revenue"><span class="h-2 w-2 rounded-full bg-indigo-500"></span>Revenue</span>
+                    <span class="inline-flex items-center gap-1.5" data-daily-trend-legend="orders"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Orders</span>
                 </div>
             <?php endif; ?>
         </section>
@@ -204,17 +225,6 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
         <section class="analytics-card p-5">
             <h3 class="text-base font-bold text-slate-900 dark:text-white">Order Performance</h3>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Status mix and conversion quality.</p>
-
-            <div class="mt-5 grid grid-cols-2 gap-3">
-                <div class="rounded-lg bg-emerald-50 p-3 dark:bg-emerald-500/10">
-                    <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Completion</p>
-                    <p class="mt-2 text-xl font-bold text-emerald-700 dark:text-emerald-300"><?= $percent($summary['completion_rate'] ?? 0) ?></p>
-                </div>
-                <div class="rounded-lg bg-rose-50 p-3 dark:bg-rose-500/10">
-                    <p class="text-xs font-semibold text-rose-700 dark:text-rose-300">Cancelled</p>
-                    <p class="mt-2 text-xl font-bold text-rose-700 dark:text-rose-300"><?= $percent($summary['cancellation_rate'] ?? 0) ?></p>
-                </div>
-            </div>
 
             <div class="mt-5 space-y-3">
                 <?php if (empty($orderStatus['rows'])): ?>
@@ -248,7 +258,7 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <section class="analytics-card p-5">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white">6 Month Revenue</h3>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Monthly revenue in the last 6 months</h3>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Finalized order revenue by month.</p>
             <div class="mt-5 space-y-3">
                 <?php if ($monthlyMaxRevenue <= 0): ?>
@@ -272,7 +282,7 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
         </section>
 
         <section class="analytics-card p-5">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white">Recent High-Value Orders</h3>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Highest value orders that were canceled</h3>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Largest orders by total value.</p>
             <div class="mt-4 divide-y divide-slate-100 dark:divide-slate-700">
                 <?php if (empty($recentHighValueOrders)): ?>
@@ -317,13 +327,13 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
             <h3 class="text-base font-bold text-slate-900 dark:text-white">Product Analytics</h3>
             <div class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top Selling</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top selling products by number of orders</p>
                     <div class="mt-2">
                         <?php $rankRows($productAnalytics['topSelling'] ?? [], 'name', 'quantity_sold', $maxTopProductQty, static fn ($value) => (int)$value . ' sold', 'bg-emerald-500'); ?>
                     </div>
                 </div>
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top Revenue</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top selling products by amount spent</p>
                     <div class="mt-2">
                         <?php $rankRows($productAnalytics['topRevenue'] ?? [], 'name', 'revenue', $maxTopProductRevenue, $money, 'bg-indigo-500'); ?>
                     </div>
@@ -353,20 +363,20 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
             </div>
             <div class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top Spend</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top Customers by amount spent</p>
                     <div class="mt-2">
                         <?php $rankRows($customerAnalytics['topSpenders'] ?? [], 'customer_name', 'total_spent', $maxCustomerSpend, $money, 'bg-cyan-500'); ?>
                     </div>
                 </div>
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top Order Count</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top Customers by orders count</p>
                     <div class="mt-2">
                         <?php $rankRows($customerAnalytics['topOrderCounts'] ?? [], 'customer_name', 'order_count', $maxCustomerOrders, static fn ($value) => (int)$value . ' orders', 'bg-violet-500'); ?>
                     </div>
                 </div>
             </div>
             <div class="mt-5">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Customers With Returns</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Top customer by number of returns</p>
                 <div class="mt-2">
                     <?php $rankRows($customerAnalytics['customersWithReturns'] ?? [], 'customer_name', 'return_count', max(1, (int)($returnAnalytics['total'] ?? 0)), static fn ($value) => (int)$value . ' returns', 'bg-rose-500'); ?>
                 </div>
@@ -379,7 +389,7 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Return status mix, products tied to returned orders, and pending work.</p>
         <div class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Return Status</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">% of approved returns</p>
                 <div class="mt-3 space-y-3">
                     <?php if (empty($returnAnalytics['statusRows'])): ?>
                         <div class="analytics-empty">No returns found.</div>
@@ -428,3 +438,29 @@ $rankRows = static function (array $rows, string $nameKey, string $valueKey, flo
         </div>
     </section>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const metricSelect = document.getElementById('dailyTrendMetric');
+    if (!metricSelect) return;
+
+    function setDailyTrendMetric(metric) {
+        document.querySelectorAll('[data-daily-trend-bar], [data-daily-trend-value], [data-daily-trend-legend]').forEach(function (element) {
+            const isActive = element.dataset.dailyTrendBar === metric
+                || element.dataset.dailyTrendValue === metric
+                || element.dataset.dailyTrendLegend === metric;
+
+            element.classList.toggle('hidden', !isActive);
+            if (element.dataset.dailyTrendLegend) {
+                element.classList.toggle('inline-flex', isActive);
+            }
+        });
+    }
+
+    metricSelect.addEventListener('change', function () {
+        setDailyTrendMetric(metricSelect.value);
+    });
+
+    setDailyTrendMetric(metricSelect.value);
+});
+</script>

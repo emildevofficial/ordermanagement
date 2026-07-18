@@ -29,7 +29,7 @@ $statusBadge = static function (string $status): string {
 [$latestOrderDate, $latestOrderTime] = $formatDateTime($summary['latest_order_timestamp'] ?? null);
 ?>
 
-<div class="space-y-6">
+<div class="space-y-5">
     <div>
         <nav class="mb-2 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
             <a href="/customers" class="font-medium text-slate-600 transition hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">Customers</a>
@@ -39,52 +39,47 @@ $statusBadge = static function (string $status): string {
         <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
             Customer Order Details
         </h2>
-        <p class="text-sm text-slate-500 dark:text-slate-300 mt-1">
-            Customer profile, order totals, and purchase history.
-        </p>
     </div>
 
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
-        <div class="mb-3">
-            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+    <div class="max-w-4xl bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div class="px-4 py-2.5 border-b border-slate-200 dark:border-slate-700">
+            <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">
                 Customer Information
             </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Order activity overview
-            </p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3">
+        <div class="grid grid-cols-2 items-start gap-x-6 gap-y-3 px-4 py-3 sm:grid-cols-5">
             <div>
-                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Customer Name</p>
-                <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100"><?= htmlspecialchars((string)($customer['name'] ?? 'Unknown')) ?></p>
+                <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Customer</p>
+                <p class="mt-1 text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100"><?= htmlspecialchars((string)($customer['name'] ?? 'Unknown')) ?></p>
             </div>
             <div>
-                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Orders Count</p>
-                <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100"><?= (int)($summary['total_orders'] ?? count($orders)) ?></p>
+                <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Order No.</p>
+                <p class="mt-1 text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100"><?= (int)($summary['total_orders'] ?? count($orders)) ?></p>
             </div>
             <div>
-                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Products Ordered</p>
-                <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100"><?= (int)($summary['total_products_ordered'] ?? 0) ?></p>
+                <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Quantity of Products </p>
+                <p class="mt-1 text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100"><?= (int)($summary['total_products_ordered'] ?? 0) ?></p>
             </div>
             <div>
-                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Amount Spent</p>
-                <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">$<?= number_format((float)($summary['total_amount_spent'] ?? 0), 2) ?></p>
+                <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Total</p>
+                <p class="mt-1 text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100">$<?= number_format((float)($summary['total_amount_spent'] ?? 0), 2) ?></p>
             </div>
             <div>
-                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Latest Order Timestamp</p>
-                <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100"><?= $latestOrderDate ?></p>
-                <?php if ($latestOrderTime !== ''): ?>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"><?= $latestOrderTime ?></p>
-                <?php endif; ?>
+                <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Latest Order</p>
+                <div class="mt-1">
+                    <p class="text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100"><?= $latestOrderDate ?></p>
+                    <?php if ($latestOrderTime !== ''): ?>
+                        <p class="mt-0.5 text-xs leading-4 text-slate-500 dark:text-slate-400"><?= $latestOrderTime ?></p>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-        <div class="px-5 sm:px-6 py-3 border-b border-slate-200 dark:border-slate-700">
-            <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Order Information / Order History</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Products, quantities, totals, and order status.</p>
+    <div class="max-w-4xl bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div class="px-4 py-2.5 border-b border-slate-200 dark:border-slate-700">
+            <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Order Information</h3>
         </div>
 
         <?php if (!empty($orders)): ?>
@@ -95,31 +90,32 @@ $statusBadge = static function (string $status): string {
                         $status = (string)($order['status'] ?? 'pending');
                         [$orderDate, $orderTime] = $formatDateTime($order['created_at'] ?? null);
                     ?>
-                    <div class="px-5 sm:px-6 py-3">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-3">
+                    <div class="px-4 py-3">
+                        <div class="grid grid-cols-2 items-start gap-x-6 gap-y-3 sm:grid-cols-5">
                                 <div>
-                                    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Order Timestamp</p>
-                                    <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100"><?= $orderDate ?></p>
-                                    <?php if ($orderTime !== ''): ?>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"><?= $orderTime ?></p>
-                                    <?php endif; ?>
+                                    <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Timestamp</p>
+                                    <div class="mt-1">
+                                        <p class="text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100"><?= $orderDate ?></p>
+                                        <?php if ($orderTime !== ''): ?>
+                                            <p class="mt-0.5 text-xs leading-4 text-slate-500 dark:text-slate-400"><?= $orderTime ?></p>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Order Status</p>
-                                    <p class="mt-1">
-                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <?= $statusBadge($status) ?>">
+                                    <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</p>
+                                    <div class="mt-1">
+                                        <span class="inline-flex h-5 items-center rounded-full px-3 text-xs font-semibold <?= $statusBadge($status) ?>">
                                             <?= htmlspecialchars(ucfirst($status)) ?>
                                         </span>
-                                    </p>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Amount Spent</p>
-                                    <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">$<?= number_format((float)($order['total'] ?? 0), 2) ?></p>
+                                    <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Total</p>
+                                    <p class="mt-1 text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100">$<?= number_format((float)($order['total'] ?? 0), 2) ?></p>
                                 </div>
                                 <div>
-                                    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Ordered Quantity</p>
-                                    <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                    <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Quantity</p>
+                                    <p class="mt-1 text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100">
                                         <?php
                                             $orderQuantity = 0;
                                             foreach ($items as $item) {
@@ -129,14 +125,13 @@ $statusBadge = static function (string $status): string {
                                         <?= $orderQuantity ?>
                                     </p>
                                 </div>
-                            </div>
 
-                            <div class="lg:min-w-60">
-                                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Ordered Product(s)</p>
+                            <div>
+                                <p class="h-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Product(s)</p>
                                 <?php if (!empty($items)): ?>
                                     <div class="mt-1 space-y-1">
                                         <?php foreach ($items as $item): ?>
-                                            <p class="text-sm font-medium text-slate-900 dark:text-slate-100">
+                                            <p class="text-sm font-medium leading-5 text-slate-900 dark:text-slate-100">
                                                 <?= htmlspecialchars((string)($item['product_name'] ?? 'Unknown Product')) ?>
                                             </p>
                                         <?php endforeach; ?>

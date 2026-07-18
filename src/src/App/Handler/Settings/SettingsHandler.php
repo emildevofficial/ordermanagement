@@ -67,6 +67,7 @@ class SettingsHandler implements RequestHandlerInterface
             'isAdmin'     => $isAdmin,
             'promo'       => $promo ?: ['new_user_discount_enabled' => 0, 'new_user_discount_percent' => 0],
             'promoSuccess' => Session::getFlash('promo_success'),
+            'profileSuccess' => Session::getFlash('profile_success'),
         ]);
 
         return new HtmlResponse(

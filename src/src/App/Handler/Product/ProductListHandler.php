@@ -43,6 +43,7 @@ class ProductListHandler implements RequestHandlerInterface
 
         $content = Template::render('products/list', [
             'products' => $products,
+            'purchaseError' => Session::getFlash('purchase_error'),
         ]);
 
         return new HtmlResponse(

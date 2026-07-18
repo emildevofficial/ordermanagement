@@ -51,9 +51,11 @@ $orderedItemsText = !empty($orderedItems) ? implode(', ', $orderedItems) : 'No o
         <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">
             Return Details
         </h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            <?= $isAdmin ? 'Detailed return management and order review.' : 'Your return request and order summary.' ?>
-        </p>
+        <?php if (!$isAdmin): ?>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Your return request and order summary.
+            </p>
+        <?php endif; ?>
     </div>
 
     <div class="space-y-2">

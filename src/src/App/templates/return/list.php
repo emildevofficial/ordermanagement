@@ -79,6 +79,7 @@ $statusLabel = static function (array $return): string {
                         <?php foreach ($returns as $return): ?>
                             <?php
                                 $rawStatus = (string)($return['status'] ?? 'pending');
+                                $canDecideReturn = $rawStatus === 'pending';
                                 $label = $statusLabel($return);
                                 [$returnDate, $returnTime] = $formatDateTime($return['created_at'] ?? null);
                                 [$orderDate, $orderTime] = $formatDateTime($return['order_created_at'] ?? null);
@@ -112,7 +113,8 @@ $statusLabel = static function (array $return): string {
                                                         <input type="hidden" name="status" value="approved">
                                                         <button type="submit"
                                                             data-status-option="approved"
-                                                            class="return-status-option inline-flex items-center justify-center rounded-md px-2.5 py-1.5 text-xs font-semibold transition <?= $rawStatus === 'approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20 opacity-70' ?>">
+                                                            <?= $canDecideReturn ? '' : 'disabled aria-disabled="true"' ?>
+                                                            class="return-status-option inline-flex items-center justify-center rounded-md px-2.5 py-1.5 text-xs font-semibold transition <?= $canDecideReturn ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20' : 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50 dark:bg-slate-700/60 dark:text-slate-500' ?>">
                                                             Approve
                                                         </button>
                                                     </form>
@@ -121,7 +123,8 @@ $statusLabel = static function (array $return): string {
                                                         <input type="hidden" name="status" value="rejected">
                                                         <button type="submit"
                                                             data-status-option="rejected"
-                                                            class="return-status-option inline-flex items-center justify-center rounded-md px-2.5 py-1.5 text-xs font-semibold transition <?= $rawStatus === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300' : 'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20 opacity-70' ?>">
+                                                            <?= $canDecideReturn ? '' : 'disabled aria-disabled="true"' ?>
+                                                            class="return-status-option inline-flex items-center justify-center rounded-md px-2.5 py-1.5 text-xs font-semibold transition <?= $canDecideReturn ? 'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20' : 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50 dark:bg-slate-700/60 dark:text-slate-500' ?>">
                                                             Reject
                                                         </button>
                                                     </form>
@@ -173,8 +176,7 @@ $statusLabel = static function (array $return): string {
 document.addEventListener('DOMContentLoaded', function () {
     var approvedBaseClasses = ['bg-emerald-50', 'text-emerald-700', 'hover:bg-emerald-100', 'dark:bg-emerald-500/10', 'dark:text-emerald-300', 'dark:hover:bg-emerald-500/20'];
     var rejectedBaseClasses = ['bg-red-50', 'text-red-700', 'hover:bg-red-100', 'dark:bg-red-500/10', 'dark:text-red-300', 'dark:hover:bg-red-500/20'];
-    var approvedActiveClasses = ['bg-emerald-100', 'text-emerald-700', 'dark:bg-emerald-500/20', 'dark:text-emerald-300'];
-    var rejectedActiveClasses = ['bg-red-100', 'text-red-700', 'dark:bg-red-500/20', 'dark:text-red-300'];
+    var disabledButtonClasses = ['bg-slate-100', 'text-slate-400', 'cursor-not-allowed', 'opacity-50', 'dark:bg-slate-700/60', 'dark:text-slate-500'];
     var pendingBadgeClasses = ['bg-amber-100', 'text-amber-700', 'dark:bg-amber-900/40', 'dark:text-amber-300'];
     var approvedBadgeClasses = ['bg-green-100', 'text-green-600', 'dark:bg-green-900/40', 'dark:text-green-300'];
     var rejectedBadgeClasses = ['bg-red-100', 'text-red-600', 'dark:bg-red-900/40', 'dark:text-red-300'];
@@ -183,20 +185,17 @@ document.addEventListener('DOMContentLoaded', function () {
     function setButtonState(toggle, status) {
         toggle.querySelectorAll('.return-status-option').forEach(function (button) {
             var option = button.dataset.statusOption;
-            button.classList.remove.apply(button.classList, approvedActiveClasses.concat(rejectedActiveClasses, approvedBaseClasses, rejectedBaseClasses, ['opacity-70']));
+            var isPending = status === 'pending';
+            button.classList.remove.apply(button.classList, approvedBaseClasses.concat(rejectedBaseClasses, disabledButtonClasses));
+            button.disabled = !isPending;
+            button.setAttribute('aria-disabled', isPending ? 'false' : 'true');
 
-            if (option === 'approved' && status === 'approved') {
-                button.classList.add.apply(button.classList, approvedActiveClasses);
-                return;
-            }
-
-            if (option === 'rejected' && status === 'rejected') {
-                button.classList.add.apply(button.classList, rejectedActiveClasses);
+            if (!isPending) {
+                button.classList.add.apply(button.classList, disabledButtonClasses);
                 return;
             }
 
             button.classList.add.apply(button.classList, option === 'approved' ? approvedBaseClasses : rejectedBaseClasses);
-            button.classList.add('opacity-70');
         });
     }
 
@@ -243,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (!row || !toggle) return;
             if (['approved', 'rejected'].indexOf(nextStatus) === -1) return;
+            if (previousStatus !== 'pending') return;
 
             setRowStatus(row, nextStatus);
 
@@ -272,6 +272,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     setRowStatus(row, previousStatus);
                 });
         });
+    });
+
+    document.querySelectorAll('.return-row').forEach(function (row) {
+        setRowStatus(row, row.dataset.returnStatus || 'pending');
     });
 });
 </script>

@@ -143,12 +143,36 @@ CustomerDetailHandler::class => CustomerDetailHandlerFactory::class,
     );
 },
 
+\App\Handler\Settings\PromotionHandler::class => function ($container) {
+    return new \App\Handler\Settings\PromotionHandler(
+        $container->get(Database::class)
+    );
+},
+
 \App\Helper\Template::class => function($container) {
     return new \App\Helper\Template();
 },
 
 \App\Handler\Profile\ProfileHandler::class => function ($container) {
     return new \App\Handler\Profile\ProfileHandler(
+        $container->get(Database::class)
+    );
+},
+
+\App\Handler\Profile\EditProfileHandler::class => function ($container) {
+    return new \App\Handler\Profile\EditProfileHandler(
+        $container->get(Database::class)
+    );
+},
+
+\App\Handler\Profile\ChangePasswordHandler::class => function ($container) {
+    return new \App\Handler\Profile\ChangePasswordHandler(
+        $container->get(Database::class)
+    );
+},
+
+\App\Handler\Settings\ChangePasswordHandler::class => function ($container) {
+    return new \App\Handler\Settings\ChangePasswordHandler(
         $container->get(Database::class)
     );
 },

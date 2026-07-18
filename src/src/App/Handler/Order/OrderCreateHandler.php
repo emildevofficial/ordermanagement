@@ -8,8 +8,6 @@ use App\Database\Database;
 use App\Helper\DateTimeHelper;
 use App\Helper\Session;
 use App\Helper\Permission;
-use App\Helper\Template;
-use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -37,14 +35,14 @@ class OrderCreateHandler implements RequestHandlerInterface
         $wantsJson = strtolower($request->getHeaderLine('X-Requested-With')) === 'xmlhttprequest'
             || strpos(strtolower($request->getHeaderLine('Accept')), 'application/json') !== false;
 
-        // Admins are not allowed to create orders manually.
-        if (Permission::isAllowed('admin') && !$wantsJson) {
+        // Admins manage inventory and order status; purchases belong to customer accounts only.
+        if (Permission::isAllowed('admin')) {
+            if ($wantsJson) {
+                return new JsonResponse(['success' => false, 'error' => 'Admins cannot create customer purchases.'], 403);
+            }
+
             return new RedirectResponse('/orders');
         }
-
-        $customers = $pdo
-            ->query("SELECT id, name, email FROM customers ORDER BY name ASC")
-            ->fetchAll();
 
         $stmt = $pdo->prepare("SELECT id, name, price, stock, is_active FROM products WHERE is_active = 1 ORDER BY name ASC");
         $stmt->execute();
@@ -63,22 +61,8 @@ class OrderCreateHandler implements RequestHandlerInterface
                     return new JsonResponse(['success' => false, 'error' => 'Please enter a valid product and quantity.'], 400);
                 }
 
-                $userName     = Session::get('user_name');
-                $role         = Session::get('user_role');
-                $currentRoute = 'orders';
-                $content = Template::render('order/create', [
-                    'customers' => $customers,
-                    'products'  => $products,
-                    'error'     => 'Invalid product or quantity.',
-                ]);
-                return new HtmlResponse(
-                    Template::render('layout', [
-                        'content'      => $content,
-                        'userName'     => $userName,
-                        'role'         => $role,
-                        'currentRoute' => $currentRoute,
-                    ])
-                );
+                Session::flash('purchase_error', 'Please enter a valid product and quantity.');
+                return new RedirectResponse('/shop');
             }
 
             $stmt = $pdo->prepare("SELECT price, stock, is_active FROM products WHERE id = ?");
@@ -90,22 +74,8 @@ class OrderCreateHandler implements RequestHandlerInterface
                     return new JsonResponse(['success' => false, 'error' => 'Product not available.'], 400);
                 }
 
-                $userName     = Session::get('user_name');
-                $role         = Session::get('user_role');
-                $currentRoute = 'orders';
-                $content = Template::render('order/create', [
-                    'customers' => $customers,
-                    'products'  => $products,
-                    'error'     => 'Product not available.',
-                ]);
-                return new HtmlResponse(
-                    Template::render('layout', [
-                        'content'      => $content,
-                        'userName'     => $userName,
-                        'role'         => $role,
-                        'currentRoute' => $currentRoute,
-                    ])
-                );
+                Session::flash('purchase_error', 'Product not available.');
+                return new RedirectResponse('/shop');
             }
 
             if ($product['stock'] < $quantity) {
@@ -116,22 +86,8 @@ class OrderCreateHandler implements RequestHandlerInterface
                     ], 400);
                 }
 
-                $userName     = Session::get('user_name');
-                $role         = Session::get('user_role');
-                $currentRoute = 'orders';
-                $content = Template::render('order/create', [
-                    'customers' => $customers,
-                    'products'  => $products,
-                    'error'     => 'Insufficient stock.',
-                ]);
-                return new HtmlResponse(
-                    Template::render('layout', [
-                        'content'      => $content,
-                        'userName'     => $userName,
-                        'role'         => $role,
-                        'currentRoute' => $currentRoute,
-                    ])
-                );
+                Session::flash('purchase_error', 'Insufficient stock. Available stock: ' . (int)$product['stock'] . '.');
+                return new RedirectResponse('/shop');
             }
 
             $userId = Session::get('user_id');
@@ -234,33 +190,19 @@ class OrderCreateHandler implements RequestHandlerInterface
                     ]);
                 }
 
-                return new RedirectResponse('/orders');
+                return new RedirectResponse('/my-orders');
             } catch (\Exception $e) {
                 $pdo->rollBack();
                 if ($wantsJson) {
                     return new JsonResponse(['success' => false, 'error' => 'Failed to create order.'], 500);
                 }
 
-                $userName     = Session::get('user_name');
-                $role         = Session::get('user_role');
-                $currentRoute = 'orders';
-                $content = Template::render('order/create', [
-                    'customers' => $customers,
-                    'products'  => $products,
-                    'error'     => 'Failed to create order: ' . $e->getMessage(),
-                ]);
-                return new HtmlResponse(
-                    Template::render('layout', [
-                        'content'      => $content,
-                        'userName'     => $userName,
-                        'role'         => $role,
-                        'currentRoute' => $currentRoute,
-                    ])
-                );
+                Session::flash('purchase_error', 'Failed to create order. Please try again.');
+                return new RedirectResponse('/shop');
             }
         }
  
         // Creation must happen from the products catalog; redirect GET to products.
-        return new RedirectResponse('/products');
+        return new RedirectResponse('/shop');
     }
 }

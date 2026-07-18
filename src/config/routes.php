@@ -19,7 +19,8 @@ use Mezzio\MiddlewareFactory;
 use Psr\Container\ContainerInterface;
 use App\Handler\Profile\ProfileHandler;
 use App\Handler\Profile\EditProfileHandler;
-use App\Handler\Profile\ChangePasswordHandler;
+use App\Handler\Profile\ChangePasswordHandler as ProfileChangePasswordHandler;
+use App\Handler\Settings\ChangePasswordHandler as SettingsChangePasswordHandler;
 use App\Handler\Customer\CustomerListHandler;
 use App\Handler\Return\ReturnCreateHandler;
 use App\Handler\Settings\SettingsHandler;
@@ -79,15 +80,10 @@ $app->get('/logout', LogoutHandler::class, 'logout');
         OrderListHandler::class,
     ], 'orders.my-list');
 
-   $app->get('/orders/create', [
+$app->post('/shop/buy', [
     AuthMiddleware::class,
     OrderCreateHandler::class,
-], 'orders.create');
-
-$app->post('/orders/create', [
-    AuthMiddleware::class,
-    OrderCreateHandler::class,
-], 'orders.create.post');
+], 'shop.buy');
 
     $app->post('/orders/{id:\d+}/update', [
         AuthMiddleware::class,
@@ -142,12 +138,12 @@ $app->post('/profile/edit', [
 
 $app->get('/profile/password', [
     AuthMiddleware::class,
-    ChangePasswordHandler::class,
+    ProfileChangePasswordHandler::class,
 ]);
 
 $app->post('/profile/password', [
     AuthMiddleware::class,
-    ChangePasswordHandler::class,
+    ProfileChangePasswordHandler::class,
 ]);
 
 $app->get('/customers', [
@@ -178,6 +174,16 @@ $app->post('/settings', [
     AuthMiddleware::class,
     SettingsHandler::class,
 ], 'settings.post');
+
+$app->get('/settings/password', [
+    AuthMiddleware::class,
+    SettingsChangePasswordHandler::class,
+], 'settings.password');
+
+$app->post('/settings/password', [
+    AuthMiddleware::class,
+    SettingsChangePasswordHandler::class,
+], 'settings.password.post');
 
 // Product routes
 $app->get('/inventory-tools', function () {

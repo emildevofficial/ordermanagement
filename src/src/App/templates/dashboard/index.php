@@ -101,7 +101,7 @@
 
     <div class='bg-white dark:bg-slate-800 rounded-xl p-4 h-[11.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden'>
         <p class='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide shrink-0'>
-            Returns Rate
+            Return Rate
         </p>
 
         <div class='flex-1 min-h-0 flex flex-col justify-center'>
@@ -110,7 +110,7 @@
             </p>
 
             <p class='text-sm text-slate-500 dark:text-slate-400 mt-4 shrink-0'>
-                <?= $totalReturns ?> return<?= $totalReturns !== 1 ? 's' : '' ?> of <?= $totalOrders ?> order<?= $totalOrders !== 1 ? 's' : '' ?>
+                <?= $totalReturns ?> return<?= $totalReturns !== 1 ? 's' : '' ?> out of <?= $totalOrders ?> order<?= $totalOrders !== 1 ? 's' : '' ?>
             </p>
         </div>
     </div>
@@ -239,7 +239,7 @@ $cancelledOffset = -($completedDash + $pendingDash);
     <?php if (Permission::isAllowed('admin')): ?>
     <!-- Revenue -->
     <div class='bg-white dark:bg-slate-800 rounded-xl p-4 h-[11.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden'>
-        <p class='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide shrink-0'>Revenue</p>
+        <p class='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide shrink-0'>Total Revenue</p>
         <div class='flex-1 min-h-0 flex flex-col justify-center'>
             <p class='text-3xl leading-none font-bold text-slate-800 dark:text-white shrink-0'>$<?= number_format($revenue, 2) ?></p>
             <p class='inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 mt-4 shrink-0'>
@@ -250,7 +250,7 @@ $cancelledOffset = -($completedDash + $pendingDash);
 
     <!-- Customers -->
     <div class='bg-white dark:bg-slate-800 rounded-xl p-4 h-[11.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden'>
-        <p class='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide shrink-0'>Total Customers</p>
+        <p class='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide shrink-0'>Total number of customers</p>
         <div class='flex-1 min-h-0 flex flex-col justify-center'>
             <p class='text-3xl leading-none font-bold text-slate-800 dark:text-white shrink-0'><?= $totalCustomers ?? 0 ?></p>
             <p class='text-sm text-slate-500 dark:text-slate-400 mt-4 shrink-0'>Registered customers</p>

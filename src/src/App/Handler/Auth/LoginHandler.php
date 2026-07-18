@@ -32,8 +32,8 @@ class LoginHandler implements RequestHandlerInterface
         if ($method === 'GET') {
             return new HtmlResponse(
                 Template::render('auth/login', [
-                    'loginError' => null,
-                    'registerError' => null
+                    'loginError' => Session::getFlash('login_error'),
+                    'registerError' => Session::getFlash('register_error')
                 ])
             );
         }

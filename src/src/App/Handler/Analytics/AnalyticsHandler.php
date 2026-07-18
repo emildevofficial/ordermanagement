@@ -144,26 +144,31 @@ final class AnalyticsHandler implements RequestHandlerInterface
         $end             = $endLocal->setTimezone($storageTimezone)->format('Y-m-d H:i:s');
 
         $stmt = $pdo->prepare("
-            SELECT
-                DATE(created_at) AS day_key,
-                COUNT(*) AS orders,
-                COALESCE(SUM(CASE WHEN status IN ('completed', 'delivered') THEN total ELSE 0 END), 0) AS revenue
+            SELECT created_at, status, total
             FROM orders
             WHERE created_at >= :start AND created_at < :end
-            GROUP BY DATE(created_at)
-            ORDER BY day_key ASC
+            ORDER BY created_at ASC
         ");
         $stmt->execute([':start' => $start, ':end' => $end]);
 
         $rowsByDay = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $rowsByDay[(string) $row['day_key']] = $row;
+            $localCreatedAt = DateTimeHelper::toLocalDateTime($row['created_at'] ?? null);
+            if ($localCreatedAt === null) {
+                continue;
+            }
+
+            $dayKey = $localCreatedAt->format('Y-m-d');
+            $rowsByDay[$dayKey] ??= ['orders' => 0, 'revenue' => 0.0];
+            $rowsByDay[$dayKey]['orders']++;
+
+            $rowsByDay[$dayKey]['revenue'] += (float) ($row['total'] ?? 0);
         }
 
         $trend  = [];
         $period = new DatePeriod($startLocal, new DateInterval('P1D'), $endLocal);
         foreach ($period as $day) {
-            $key     = $day->setTimezone($storageTimezone)->format('Y-m-d');
+            $key     = $day->format('Y-m-d');
             $row     = $rowsByDay[$key] ?? null;
             $trend[] = [
                 'label'   => $day->format('D'),

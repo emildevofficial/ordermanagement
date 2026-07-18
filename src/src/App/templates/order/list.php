@@ -104,7 +104,7 @@ $isAdmin = Permission::isAllowed('admin');
                                         if ($status === 'cancelled') $badge = 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300';
                                     ?>
                                     <span data-order-status-badge class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <?= $badge ?>">
-                                        <?= htmlspecialchars(ucfirst($status)) ?>
+                                        <?= htmlspecialchars($status === 'completed' ? 'Confirm' : ucfirst($status)) ?>
                                     </span>
                                 </td>
                                 <?php if (!$isAdmin): ?>
@@ -153,7 +153,7 @@ $isAdmin = Permission::isAllowed('admin');
                                                 <button type="button"
                                                     data-order-status-action="complete"
                                                     class="inline-flex items-center justify-center rounded-md bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20">
-                                                    Complete
+                                                    Confirm
                                                 </button>
                                                 <button type="button"
                                                     data-order-status-action="cancel"
@@ -407,6 +407,10 @@ document.addEventListener('DOMContentLoaded', function () {
         'bg-purple-100', 'text-purple-600', 'dark:bg-purple-900/40', 'dark:text-purple-300'
     ];
     function statusLabel(status) {
+        if (status === 'completed') {
+            return 'Confirm';
+        }
+
         return status.charAt(0).toUpperCase() + status.slice(1);
     }
 

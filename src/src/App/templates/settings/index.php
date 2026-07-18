@@ -20,6 +20,12 @@ $displayRoleLabel = ($role ?? '') === 'admin' ? 'Owner' : (($role ?? '') === 'us
         </div>
     </div>
 
+    <?php if (!empty($profileSuccess)): ?>
+        <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+            <?= htmlspecialchars($profileSuccess) ?>
+        </div>
+    <?php endif; ?>
+
     <!-- Card -->
     <div class="bg-white dark:bg-slate-800 shadow rounded-xl overflow-hidden">
 

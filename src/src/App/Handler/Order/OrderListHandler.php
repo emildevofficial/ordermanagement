@@ -169,7 +169,9 @@ class OrderListHandler implements RequestHandlerInterface
             $hasReturn = !empty($order['has_return']);
 
             $order['can_cancel'] = $status === 'pending';
-            $order['can_return'] = !$isAdmin && !$hasReturn;
+            $order['can_return'] = !$isAdmin
+                && in_array($status, ['completed', 'delivered'], true)
+                && !$hasReturn;
         }
         unset($order);
 
